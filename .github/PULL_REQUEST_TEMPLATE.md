@@ -1,6 +1,6 @@
 > 작성자 :
 > 이  슈 :  
-> 작성일: year.mon.day
+> 작성일: year.mon.day  
 > 해결안 링크: https://www.notion.so/mybear/056ae4ec180d4709a427e2519faf421c
 
 # 우선순위: [1-5]
