@@ -258,3 +258,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# datasets
+data/datasets/
+
+# .DS_score
+.DS_Store
