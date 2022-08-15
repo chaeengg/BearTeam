@@ -261,7 +261,7 @@ dist
 
 <<<<<<< HEAD
 # Dataset
-edu/model/voc/*
+data/datasets/
 
 # Model
 *.pt
