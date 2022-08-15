@@ -260,7 +260,7 @@ dist
 .pnp.*
 
 # Dataset
-edu/model/voc/*
+data/datasets/
 
 # Model
 *.pt
