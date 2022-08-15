@@ -259,6 +259,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+<<<<<<< HEAD
 # Dataset
 edu/model/voc/*
 
@@ -267,3 +268,14 @@ edu/model/voc/*
 
 # Others
 *.DS_Store
+=======
+# datasets
+data/datasets/
+
+# .DS_score
+.DS_Store
+
+# Dont ignore
+*.json
+*.jcsv
+>>>>>>> fc1db1e4120da12ddb2b79387437d221cf23138f
