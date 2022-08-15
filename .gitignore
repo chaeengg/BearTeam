@@ -264,3 +264,7 @@ data/datasets/
 
 # .DS_score
 .DS_Store
+
+# Dont ignore
+*.json
+*.jcsv
