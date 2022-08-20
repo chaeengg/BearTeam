@@ -259,11 +259,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Dataset
-edu/model/voc/*
-
 # Model
 *.pt
 
 # Others
 *.DS_Store
+
