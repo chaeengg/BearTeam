@@ -9,14 +9,10 @@
     <title>Cover Template · Bootstrap v5.2</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/5.2/examples/cover/">
-
-
-
-
-sdfsdfs
-
-
-<link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.2/examples/product/">
+    <!-- <link href="../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">-->
+    <link href="bootstrap.min.css" rel="stylesheet">
+    
 
     <style>
       .bd-placeholder-img {
@@ -70,26 +66,47 @@ sdfsdfs
         -webkit-overflow-scrolling: touch;
       }
 
+            /*
+      * Custom translucent site header 
+      */
+
+      .site-header {
+        background-color: rgba(0, 0, 0, .85);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        backdrop-filter: saturate(180%) blur(20px);
+      }
+      .site-header a {
+        color: #8e8e8e;
+        transition: color .15s ease-in-out;
+      }
+      .site-header a:hover {
+        color: #fff;
+        text-decoration: none;
+      }
+
 
     </style>
 
 
     <!-- Custom styles for this template -->
     <link href="cover.css" rel="stylesheet">
+    
   </head>
-  <body class="d-flex h-100 text-center text-bg-light">
-
+  <body class="d-flex h-100 text-center bg-success p-2 text-dark bg-opacity-25">
+  <!--<div class="bg-success p-2 text-dark bg-opacity-10">This is 10% opacity success background</div>-->
 
 
 <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
   <header class="mb-auto">
+    
     <div>
-      <img class="float-md-start" src="https://item.kakaocdn.net/do/9f6391218e3a68eb052a0e6bdd46e649616b58f7bf017e58d417ccb3283deeb3" width="50", height="50" >
-      <!--h3 class="float-md-start mb-0 fw-bold">BearTeam</h3-->
+      <img class="float-md-start" src="https://item.kakaocdn.net/do/9f6391218e3a68eb052a0e6bdd46e649616b58f7bf017e58d417ccb3283deeb3" width="38", height="38"
+      hspace="10" align=left>
+      <h3 class="float-md-start mb-0 fw-bold">BearTeam</h3>
       <nav class="nav nav-masthead justify-content-center float-md-end">
-        <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="index.html">서비스소개</a>
-        <a class="nav-link fw-bold py-1 px-0" href="index2.html">서비스영상</a>
-        <a class="nav-link fw-bold py-1 px-0" href="index3.html">팀정보</a>
+        <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="index.html">Intro</a>
+        <a class="nav-link fw-bold py-1 px-0" href="index2.html">Try</a>
+        <a class="nav-link fw-bold py-1 px-0" href="index3.html">Team info</a>
       </nav>
     </div>
   </header>
@@ -99,22 +116,26 @@ sdfsdfs
       <div class="row">
         <div class="col" >
           <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQqjssvHhbkoqeRInsMnFYPok6J13tFCalvhze2ZHON5hUJVs9De8_nhpGtrQflN7ifmBw&usqp=CAU"
-          alt="two men riding bicycle" width="200" height="200"
-          style ="margin-top : 100px">
+          alt="two men riding bicycle" width="300" height="300"
+          style ="margin-top : 50px" align="left">
         </div>
         <div class="col">
           <h1 class='isub fw-bold'>ISUB </h1>
-    <p class="lead">ISUB(I'll See Ur Backside)는 자전거 이용자들의 후방 충돌을 방지해 안전을 지켜주는 서비스입니다.
-      </p>
-    <p class="lead">후방 좌측 / 우측에서 다가오는 자전거 / 전동 킥보드 / 오토바이를 탐지해 위험도를 시각화하여 이용자가 빠른 대처를 할 수 있도록 합니다.
-      </p>
+          
+          <p class="lead">ISUB(I'll See Ur Backside)는 자전거 이용자들의 후방 충돌을 방지해 안전을 지켜주는 서비스입니다.
+          </p>
+          
+          <p class="lead">후방 좌측 / 우측에서 다가오는 자전거 / 전동 킥보드 / 오토바이를 탐지해 위험도를 시각화하여 이용자가 빠른 대처를 할 수 있도록 합니다.
+          </p>
 
-      <p class="lead">
-      <a href="index2.html" class="btn btn-lg btn-secondary fw-bold border-white bg-white">사용해보기</a>
-    </p>
+          <p class="lead">
+          <a href="index2.html" class="btn btn-lg btn-secondary fw-bold border-white bg-white">Try it!</a>
+          </p>
+
         </div>
       </div>
-
+    </div>
+      
   </main>
 
   <footer class="mt-auto text-white-50">
