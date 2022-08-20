@@ -1,0 +1,6 @@
+{
+    "pathes": {
+        "image": "assets/images",
+        "annotations": "assets/annotations"
+    }
+}

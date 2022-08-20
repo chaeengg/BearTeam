@@ -1,0 +1,12 @@
+{
+    "image-name": "test.png",
+    "image-height": 480,
+    "image-width": 480,
+    "image-center": [240, 240],
+    "objects": {
+        "bicycle": {
+            "bbox": [0, 0, 10, 10],
+            "dangerous": 1
+        }
+    }
+}
