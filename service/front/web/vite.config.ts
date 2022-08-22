@@ -12,6 +12,7 @@ export default defineConfig({
             '/@compositions': path.resolve(__dirname, './src/compositions'),
             '/@modules': path.resolve(__dirname, './src/modules'),
             '/@router': path.resolve(__dirname, './src/router'),
+            '/@types': path.resolve(__dirname, './src/types'),
         }
     }
 })
