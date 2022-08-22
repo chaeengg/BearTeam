@@ -8,7 +8,6 @@ import json
 import numpy as np
 import base64
 from pydantic import BaseModel
-from pydantic import ValidationError
 
 
 url = {
@@ -41,3 +40,5 @@ async def read_all_annotations():
 async def read_annotation():
     pass
 
+
+@app
