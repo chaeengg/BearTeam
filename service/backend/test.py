@@ -4,9 +4,18 @@ from datetime import datetime
 from typing import List
 ########################
 
-obj = Object(category=ObjectCategory.BICYCLE, probability=0.7, center=[0.3, 0.2], width=0.1, height=0.2, risk=None)
-obj = Object(category=ObjectCategory.BICYCLE, probability=0.7, center=[0.3, 0.2], width=0.1, height=0.2, risk=None)
-obj = Object(category=ObjectCategory.BICYCLE, probability=0.7, center=[0.3, 0.2], width=0.1, height=0.2, risk=None)
+# 이전 프레임, 현재 프레임.... 프레임 정보는 10초 정도는 보관 -> 10 - 20 정도 디텍션 된 이미지
+# Log 1장 = Frame 1장(디텍션된 프레임)
+# 제공될 데이터는 Log들!
+log1 = Log(recorded=datetime.now(), objects=[], risked=[], risk=RiskCategory.HIGH) # <--- get_grad => 다가오면 risk 
+log2 = Log(recorded=datetime.now(), objects=[], risked=[], risk=RiskCategory.HIGH) # <--- get_grad => 다가오면 risk 
+log3 = Log(recorded=datetime.now(), objects=[], risked=[], risk=RiskCategory.HIGH) # <--- get_grad => 다가오면 risk 
+
+## 채워야 할 것: risked, risk, object별 risk 
+
+## 1. 같은 오브젝트끼리 묶기 => getIOU => 같은 Object 별 List를 만들기
+## 2. risk 계산하기 => size & grad => 가장 최신 Frame의 Object risk에 넣기
+## 3. log 전체에 대해서 Risk 계산하기 ==> 가장 큰 Risk 선택하기
 
 
 ### Log 찍기
@@ -100,7 +109,7 @@ def determine_risk(obj:Object):
         return RiskCategory.HIGH
 
 
-###3. 선형회귀 => 다가오고 있는 물체 판단하기 -> 보류
+###3. 변화량만
 def get_grad(same_objects:List[Object]):
     """
     프레임 순서로 정렬됨
