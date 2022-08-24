@@ -27,19 +27,6 @@ export default {
 </script>
 
 <script lang="ts" setup>
-<<<<<<< HEAD
-import MyCanvas from './MyCanvas.vue'
-export default {
-  components: {
-    MyCanvas
-  },
-  data() {
-    return {
-      radius: 50
-    }
-  }
-}
-=======
 import {reactive, ref, Ref, onMounted,} from 'vue';
 import {Socket} from '../modules/axios';
 import {Result, Video} from '../types';
@@ -69,7 +56,6 @@ const log:string[] = reactive(["start video..."]);
 //             console.log(err);
 //         })
 // });
->>>>>>> 56133134a8263eaec965c9708d9314fef6be4be1
 
 //import {reactive, ref, Ref, onMounted,} from 'vue';
 //import {Socket} from '../modules/axios';
