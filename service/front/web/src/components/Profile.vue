@@ -36,7 +36,7 @@ const profiles:Profile[] = reactive([
 
 <style>
 .row{
-    font-family:"S-CoreDream-3Light";
+    font-family:"GowunDodum-Regular";
 }
 .info{
     font-family:"LeferiPoint-WhiteObliqueA";
