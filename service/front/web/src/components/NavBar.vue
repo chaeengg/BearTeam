@@ -1,8 +1,10 @@
 <template>
 <header class="mb-auto">
     <div>
-      <img class="float-md-start" src="https://item.kakaocdn.net/do/9f6391218e3a68eb052a0e6bdd46e649616b58f7bf017e58d417ccb3283deeb3" width="38" height="38" hspace="10" align=left />
-      <h3 class="float-md-start mb-0 fw-bold">BearTeam</h3>
+      <router-link :to="pages.home.url" class="nav-link fw-bold text-success py-1 px-0" :class="{active : currentPage.key == pages.home.key}" @click="onFocus($event, pages.home)" >
+        <img class="float-md-start" src="https://item.kakaocdn.net/do/9f6391218e3a68eb052a0e6bdd46e649616b58f7bf017e58d417ccb3283deeb3" style="width:3rem; height:3rem; margin-right: 1rem; padding-right: 0rem;" />
+        <h3 class="float-md-start mb-0 fw-bold">BearTeam</h3>
+      </router-link>
       <nav class="nav nav-masthead justify-content-center float-md-end">
         <router-link v-for="page in pages" :to="page.url" class="nav-link fw-bold py-1 px-0" :class="{active : currentPage.key == page.key}" @click="onFocus($event, page)">{{page.name}}</router-link>
       </nav>
