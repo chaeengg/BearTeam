@@ -1,12 +1,13 @@
 <template>
 <main class="px-3">
     <div class="m-portlet__body">
+        <p class="info">&lt 팀원정보 &gt</p>
         <div class="row" style="text-align:center;" font-size="0.6rem">
             <div v-for="profile in profiles" :key="profile.key" class="col-md-4" style="margin-bottom: 2.0rem; margin-top: 2.0rem;">
                 <img class="certificate" :title="profile.name" :src="profile.url" style="width:10.0rem;height:10.0rem; margin-bottom: 0.5rem;"/>
-                <br />
+                <br/>
                 {{profile.name}}
-                <br />
+                <br/>
                 {{profile.email}}
             </div>
         </div>
@@ -32,3 +33,12 @@ const profiles:Profile[] = reactive([
     {key: 4, name: '윤영로', url: 'src/assets/profiles/yeongro.png', email: 'appleofyyr@icloud.com', role: ''},
 ]);
 </script>
+
+<style>
+.row{
+    font-family:"S-CoreDream-3Light";
+}
+.info{
+    font-family:"LeferiPoint-WhiteObliqueA";
+}
+</style>

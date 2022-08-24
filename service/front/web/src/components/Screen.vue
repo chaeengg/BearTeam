@@ -1,5 +1,5 @@
 <template>
-<canvas id="screen" :width="width" :height="height" ref="canvas"></canvas>
+<canvas id="screen" :width="height" :height="height" ref="canvas"></canvas>
 </template>
 
 <script lang="ts">
@@ -19,18 +19,20 @@ onMounted(() => {
 });
 
 const img = ref(new Image());
-img.value.src = 'src/assets/profiles/chaena.png';
-const center:Ref<number[]> = ref([10, 150]);
-const width:Ref<number> = ref(640)
+img.value.src = 'src/assets/profiles/KakaoTalk_20220823_113458238.jpg';
+const center:Ref<number[]> = ref([30, 100]);
+const width:Ref<number> = ref(640);
 const height:Ref<number> = ref(640);
+const bbox_width: Ref<number> = ref(150);
+const bbox_height: Ref<number> = ref(300);
 
 const objName:Ref<string> = ref("bicycle");
 const risk: Ref<string> = ref("high");
 
 const path:Ref<"왼쪽"|"중앙"|"오른쪽"> = computed(() => {
-    if (center.value[0] + width.value / 2 <= 213) {
+    if (center.value[0] + bbox_width.value / 2 <= 213) {
         return "왼쪽";
-    } else if (center.value[0] + width.value / 2 <= 427) {
+    } else if (center.value[0] + bbox_width.value / 2 <= 427) {
         return "중앙";
     } else {
         return "오른쪽"
@@ -43,10 +45,11 @@ img.value.onload = () => {
         ctx.value.drawImage(img.value, 0, 0);
         ctx.value.fillStyle = 'red';
         ctx.value.globalAlpha = 0.5;
-        ctx.value.fillRect(center.value[0], center.value[1], width.value, height.value);
+        ctx.value.fillRect(center.value[0], center.value[1], bbox_width.value, bbox_height.value);
+        ctx.value.globalAlpha = 1.0;
         ctx.value.textAlign = "center";
-        ctx.value.font = "bold 30px Arial, sans-serif";
-        ctx.value.fillText(`${objName} 감지! 위험도: ${risk}`, 250, 100);
+        ctx.value.font = "bold 30px KOTRA_BOLD-Bold";
+        ctx.value.fillText(`${objName} 감지! 위험도: ${risk}`, 300, 300);
     }
 }
 
@@ -55,7 +58,7 @@ img.value.onload = () => {
 <style scoped>
 canvas {
     border: 0.1rem solid #fff; 
-    height: 20.0rem; 
-    width: 20.0rem;
+    height: 640; 
+    width: 640;
 }
 </style>

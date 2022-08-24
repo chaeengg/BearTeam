@@ -1,5 +1,5 @@
 <template>
-  <footer class="mt-auto text-dark">
+  <footer class="foot mt-auto text-dark text-opacity-25">
     <p>Project by Bear Team, our <a href="https://github.com/YeongRoYun/BearTeam" class="text-white" target="_blank">github</a></p>
   </footer>
 </template>
@@ -16,5 +16,7 @@ export default {
 
 
 <style scoped>
-
+.foot{
+  font-family:"LeeSeoyun";
+}
 </style>

@@ -7,7 +7,6 @@ import Info from '/@components/Info.vue'
 import Screen from '/@components/Screen.vue';
 import NavBar from '/@components/NavBar.vue';
 import Profile from '/@components/Profile.vue';
-import CustomCanvas from '/@components/CustomCanvas.vue';
 
 
 
@@ -30,6 +29,5 @@ app.component(Info.name, Info);
 app.component(Screen.name, Screen);
 app.component(NavBar.name, NavBar);
 app.component(Profile.name, Profile);
-app.component(CustomCanvas.name, CustomCanvas);
 
 app.mount('#app');

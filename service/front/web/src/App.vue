@@ -18,17 +18,17 @@ const pages: {[page: string]:Page} = reactive({
     'home': {
         key: 0,
         url: '/home',
-        name: 'Intro',
+        name: 'INTRO',
     },
     'demo': {
         key: 1,
         url: '/demo',
-        name: 'Try',
+        name: 'TRY',
     },
     'profile': {
         key: 2,
         url: '/profile',
-        name: 'Team Info',
+        name: 'TEAM INFO',
     },
 });
 const currentPage:Page = ref(pages.home);
