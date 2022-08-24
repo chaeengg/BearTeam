@@ -1,3 +1,4 @@
+from xmlrpc.client import boolean
 from common.types import *
 from camera.utils.mycamera import MyCamera
 
@@ -25,7 +26,7 @@ async def start_video(title, response:Response):
     videos = await camera.get_videos()
 
     if title not in videos:
-        videos[title] = await camera.start_video(title, 300, 300)
+        videos[title] = await camera.start_video(title, 640, 640)
 
     return videos[title]
 
@@ -40,6 +41,19 @@ async def end_video(title, response:Response):
         videos[title] = await camera.end_video(videos[title]) # duration update
         return videos[title]
 
+@router.post('/{title}/checkpoint', response_model=boolean)
+async def make_checkpoint(title, response:Response):
+    """
+    Save latest frame for logging
+    """
+    global videos
+    if title not in videos or len(videos[title].frames) == 0:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return None
+    else:
+        return await camera.save_frame(videos[title], videos[title].frames[-1])
+
+
 @router.get('/{title}/streaming', response_model=Image)
 async def get_stream(title:str, response:Response):
     """
@@ -51,7 +65,7 @@ async def get_stream(title:str, response:Response):
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
     else:
-        img:Image = await camera.take_picture(videos[title])
+        img:Image = await camera.capture(videos[title])
         videos[title].frames.append(img)
         return img
 
