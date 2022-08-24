@@ -6,6 +6,7 @@ import Demo from '/@components/Demo.vue';
 import Info from '/@components/Info.vue'
 import NavBar from '/@components/NavBar.vue';
 import Profile from '/@components/Profile.vue';
+import CustomCanvas from '/@components/CustomCanvas.vue';
 
 
 
@@ -26,5 +27,6 @@ app.component(Demo.name, Demo);
 app.component(Info.name, Info);
 app.component(NavBar.name, NavBar);
 app.component(Profile.name, Profile);
+app.component(CustomCanvas.name, CustomCanvas);
 
 app.mount('#app');

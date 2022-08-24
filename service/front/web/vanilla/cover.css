@@ -2,6 +2,20 @@
  * Globals
  */
 
+@font-face {
+  font-family: 'KOTRA_BOLD-Bold';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10-21@1.1/KOTRA_BOLD-Bold.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+@import url('https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css');
+
+@font-face {
+  font-family: 'ImcreSoojin';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.3/ImcreSoojin.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
 
 /* Custom default button */
 .btn-secondary,
@@ -50,3 +64,11 @@ body {
   color: rgba(100, 100, 100, .5);
   border-bottom-color: #fff;
 }
+
+.isub{
+  font-family: "KOTRA_BOLD-Bold"
+}
+.header{
+  font-family: "KOTRA_BOLD-Bold"
+}
+.
