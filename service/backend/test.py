@@ -93,17 +93,20 @@ def determine_risk(obj:Object):
 
     risk = alpha * size + (1 - alpha) * get_grad(objects) # [0 - 1]
 
-    if risk < 1 / 3:
-        return RiskCategory.LOW
-    elif risk < 2 / 3:
-        return RiskCategory.MID
-    else:
-        return RiskCategory.HIGH
-
 
     if size < 1 / 9:
         return RiskCategory.LOW
     elif size < 2 / 9:
+        return RiskCategory.MID
+    else:
+        return RiskCategory.HIGH
+    
+
+
+
+    if risk < 1 / 3:
+        return RiskCategory.LOW
+    elif risk < 2 / 3:
         return RiskCategory.MID
     else:
         return RiskCategory.HIGH
@@ -113,7 +116,7 @@ def determine_risk(obj:Object):
 def get_grad(same_objects:List[Object]):
     """
     프레임 순서로 정렬됨
-    [1, 3, 2]
+    [1, 3, 2] version 1
         step 1:(before for statement)
             prv_size = 1
             grad = 0
@@ -127,8 +130,39 @@ def get_grad(same_objects:List[Object]):
             prv_size = 3
             cur_size = 2
             grad = alpha * grad + (cur_size - prv_size) = 1.0 * 2 + (-1) = +1.0
+            grad = 0.01 * 0.1 + (2-3) = 0.001 -1 = -0.998
+            grad = 0.01 * 0.05 + (2-3) = 0.005 -1 = -0.995
+
+    [0.01, 0.03, 0.02, 0.03, 0.06] version 2
+        step 1:(before for statement)
+            prv_size = 0.01
+            grad = 0
+
+        step 2:(begin for statement)
+            prv_size = 0.01
+            cur_size = 0.03
+            grad = alpha * grad + (cur_size - prv_size) = 0 + 0.02 = 0.02
+
+        step 3:
+            prv_size = 0.03
+            cur_size = 0.02
+            grad = alpha * grad + (cur_size - prv_size) = 0.01*0.02 - 0.01 = -0.0098
+            
+
+        step 4:
+            prv_size = 0.02
+            cur_size = 0.03
+            grad = alpha * grad + (cur_size - prv_size) = 0.01*(-0.0098) + 0.01 = -0.000098+0.01= 0.0099902
+
+
+        step 5:
+            prv_size = 0.03
+            cur_size = 0.06
+            grad = alpha * grad + (cur_size - prv_size) = 0.01*(0.0099902) + 0.03 = 0.03xx
+
     """
-    prv_size = obj[0].width * obj[0].height
+    
+    prv_size = same_objects[0].width * same_objects[0].height
     grad = 0.0
     alpha = 0.01
     for obj in same_objects[1:]:
@@ -137,9 +171,9 @@ def get_grad(same_objects:List[Object]):
 
         prv_size = cur_size
     
-    if grad > 0.03:
+    if grad > 0.01: # threshold : 0.01
         return 1.0
-    elif grad < -0.03:
+    elif grad < -0.01:
         return 0.0
     else:
         return 0.5
