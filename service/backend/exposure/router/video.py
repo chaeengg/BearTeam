@@ -3,12 +3,18 @@ from camera.utils.mycamera import MyCamera
 
 from typing import List, Dict
 
+import sched, time
+
 from fastapi import APIRouter, Response, status
 
 router = APIRouter(prefix='/video', tags=['video'])
 
 camera = MyCamera()
 videos: Dict[str, Video] = {}
+
+scheduler = sched.scheduler(time.time, time.sleep)
+
+
 
 @router.post('/{title}/start', response_model=Video)
 async def start_video(title, response:Response):
