@@ -90,12 +90,12 @@
 
   <main class="px-3">
     <h5>영상제목</h5>
-    <div class=”embed-responsive embed-responsive-16by9“>
-      <video autoplay loop class=”embed-responsive-item“ height="300" width="600" style='border: 5px solid #fff'>
-        <!source src=http://techslides.com/demos/sample-videos/small.mp4 type=video/mp4>
-      </video>
+    <div class="embed-responsive embed-responsive-16by9">
+      <canvas id="myCanvas" width="640" height="640" style="border:1px solid"></canvas>
     </div>
-    <div class="lead">정보 전달 자리</div>
+    <div id="direction">
+      
+    </div>
   </main>
 
   <footer class="mt-auto text-white-50">
@@ -103,7 +103,44 @@
   </footer>
 </div>
 
+<script>
+  var canvas = document.getElementById('myCanvas');
+  var ctx = canvas.getContext("2d");
+  var img = new Image();
+  img.src = '../src/assets/profiles/KakaoTalk_20220823_113458238.jpg'; //frame/video/frame_id - title 가져오기
+  // 위험 object bounding box 정보 
+  var center = [10, 150] // objectSchema - center list 형태 (Normalize된건 어떻게..???)
+  var x_center = center[0]  
+  var y_center = center[1]
+  var width = 100
+  var height = 100
+  var object_name = "bicycle"  // objectSchema - category
+  var danger_score = "high" // objectSchema - risk: value 
+  // 왼쪽 가운데 오른쪽 구분
+  if ((x_center + width/2) <= 213){
+    path = "왼쪽"
+  } else if ((x_center + width/2) <= 427){
+    path = "중앙"
+  } else {
+    path = "오른쪽"
+  }
+  var a = document.getElementById('direction');
+  a.innerHTML = path + "에서 " + object_name + "이 다가오고 있습니다.";
 
+  img.onload = function(){
+      ctx.drawImage(img, 0, 0);
+      ctx.fillStyle = 'red';
+      ctx.globalAlpha = "0.5"; 
+      ctx.fillRect(x_center, y_center, width, height);//x좌표, y좌표, 가로, 세로
+      ctx.textAlign = "center";
+      ctx.font = "bold 30px Arial, sans-serif";
+      let text = object_name + "감지! 위험도: " + danger_score;
+      ctx.globalAlpha = "1.0"
+      ctx.fillText(text, 250, 100); 
+  }
+</script>
 
-  </body>
+</body>
 </html>
+
+
