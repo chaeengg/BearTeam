@@ -91,7 +91,7 @@ const format = (log:Log):string => {
     cnt = objects.length
     for(cnt)
     {
-        
+        i = 0
         if (log.objects.category == "bicycle"){
                 msg3 = alert("자전거");
         } elif (log.objects[i].category == "motocycle"){
@@ -104,6 +104,7 @@ const format = (log:Log):string => {
         if cnt > 1:
             msg3 = alert("와");
         cnt -= 1;
+        i = i + 1;
     }
 
             
