@@ -44,12 +44,12 @@ watch(video, (currentVideo:Ref<RawVideo | null>, oldVideo:Ref<RawVideo | null>) 
         height = (video.value?.height) ? video.value?.height : 1;
 
         imgData.value = ctx.value?.createImageData(width, height) ? ctx.value?.createImageData(width, height) :imgData.value;
+        startVideoStreaming();
     }
-    startVideoStreaming();
 });
 
 const startVideoStreaming = async () => {
-    console.log("Enter!!");
+    // console.log("Enter!!");
     while(true) {
         if(video.value) {
             if(socket.isConnected()) {
@@ -77,6 +77,7 @@ const startVideoStreaming = async () => {
                     console.log("영상을 받아오는데 실패했습니다. 연결을 확인해주세요.");
                     return false;
                 });
+                
                 if(ret == false) {
                     break;
                 }
