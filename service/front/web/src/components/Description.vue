@@ -26,42 +26,43 @@ const socket: Socket = inject("socket", new Socket(""));
 const video: Ref<RawVideo | null> = inject("video", ref(null));
 const logs: Ref<Log[]> = ref([]);
 
-watch(video, (currentVideo:Ref<RawVideo | null>, oldVideo:Ref<RawVideo | null>) => {
-    if(currentVideo) {
-       startLogStreaming();
-    }
-});
+// watch(video, (currentVideo:Ref<RawVideo | null>, oldVideo:Ref<RawVideo | null>) => {
+//     if(currentVideo) {
+//        startLogStreaming();
+//     }
+// });
 
-const startLogStreaming = async () => {
-    // console.log("Enter!!");
-    while(true) {
-        if(video.value) {
-            if(socket.isConnected()) {
-                const ret = await socket.run("GET", `/log/${video.value?.title}/streaming`, (ret:Result) => {
-                    logs.value.push(ret.data);
-                })
-                .then((ret:boolean) => {
-                    if(ret) {
-                        // console.log(logs.value);
-                        return true
-                    } else {
-                        console.log("로그를 받아오는데 실패했습니다. 연결을 확인해주세요.");
-                        return false;
-                    }
-                });
-                if(ret == false) {
-                    break;
-                }
-            } else {
-                console.log("로그를 받아오던 중, 서버와의 연결이 끊겼습니다.");
-                break;
-            }
-        } else {
-            console.log("로그를 받아오던 중, 서버와의 연결이 끊겼습니다.");
-            break;
-        }
-    }
-};
+// const startLogStreaming = async () => {
+//     // console.log("Enter!!");
+//     while(true) {
+//         if(video.value) {
+//             if(socket.isConnected()) {
+//                 const ret = await socket.run("GET", `/log/${video.value?.title}/streaming`, (ret:Result) => {
+//                     logs.value.push(ret.data);
+//                 })
+//                 .then((ret:boolean) => {
+//                     if(ret) {
+//                         // console.log(logs.value);
+//                         return true
+//                     } else {
+//                         console.log("로그를 받아오는데 실패했습니다. 연결을 확인해주세요.");
+//                         return false;
+//                     }
+//                 });
+//                 if(ret == false) {
+//                     break;
+//                 }
+//             } else {
+//                 console.log("로그를 받아오던 중, 서버와의 연결이 끊겼습니다.");
+//                 break;
+//             }
+//         } else {
+//             console.log("로그를 받아오던 중, 서버와의 연결이 끊겼습니다.");
+//             break;
+//         }
+//         setTimeout(() => {}, 3000);
+//     }
+// };
 
 const format = (log:Log):string => {
     log.objects;

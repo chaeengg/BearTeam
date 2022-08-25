@@ -33,7 +33,7 @@ onMounted(() => {
     ctx.value = canvas.value?.getContext("2d") as CanvasRenderingContext2D;
 });
 
-
+const _sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
 //계속 이미지 받아오기
 let width: number = 1;
@@ -49,7 +49,6 @@ watch(video, (currentVideo:Ref<RawVideo | null>, oldVideo:Ref<RawVideo | null>) 
 });
 
 const startVideoStreaming = async () => {
-    // console.log("Enter!!");
     while(true) {
         if(video.value) {
             if(socket.isConnected()) {
@@ -58,7 +57,6 @@ const startVideoStreaming = async () => {
                 })
                 .then((ret:boolean) => {
                     if(ret) {
-                        // console.log(`rawImg.value`);
                         return setImage();
                     } else {
                         return Promise.reject();
@@ -89,16 +87,19 @@ const startVideoStreaming = async () => {
             console.log("이미지를 받아오던 중, 서버와의 연결이 끊겼습니다.");
             break;
         }
+        // await _sleep(5000);
     }
+
+    // 영상이 끝나면 화면도 처음으로!
+    imgData.value.data.fill(0);
+    ctx.value?.putImageData(imgData.value, 0, 0);
 }
 
 let bytes: Uint8Array;
 const setImage = async () => {
-    bytes = Uint8Array.from(atob(rawImg.value?.data ? rawImg.value?.data : ""), c => c.charCodeAt(0));
-    for(let idx = 0; idx < imgData.value.height; ++idx) {
-        imgData.value.data[idx] = bytes[idx];
-    }
-    if(ctx.value) {
+    if(video.value && ctx.value) {
+        bytes = Uint8Array.from(atob(rawImg.value?.data ? rawImg.value?.data : ""), c => c.charCodeAt(0));
+        imgData.value.data.set(bytes);
         ctx.value?.putImageData(imgData.value, 0, 0);
         return true;
     }
