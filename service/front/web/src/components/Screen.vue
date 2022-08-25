@@ -27,7 +27,7 @@ const ctx:Ref<CanvasRenderingContext2D | null> = ref(null);
 
 const rawImg:Ref<RawImage | null > = ref(null);
 const img = ref(new Image());
-const imgData: Ref<ImageData> = ref(new ImageData(0, 0));
+const imgData: Ref<ImageData> = ref(new ImageData(1, 1));
 
 onMounted(() => {
     ctx.value = canvas.value?.getContext("2d") as CanvasRenderingContext2D;
@@ -36,23 +36,24 @@ onMounted(() => {
 
 
 //계속 이미지 받아오기
-let width: number = 0;
-let height: number = 0;
+let width: number = 1;
+let height: number = 1;
 watch(video, (currentVideo:Ref<RawVideo | null>, oldVideo:Ref<RawVideo | null>) => {
     if(currentVideo) {
-        width = (video.value?.width) ? video.value?.width : 0;
-        height = (video.value?.height) ? video.value?.height : 0;
+        width = (video.value?.width) ? video.value?.width : 1;
+        height = (video.value?.height) ? video.value?.height : 1;
 
         imgData.value = ctx.value?.createImageData(width, height) ? ctx.value?.createImageData(width, height) :imgData.value;
-        startVideoStreaming();
     }
+    startVideoStreaming();
 });
 
-const startVideoStreaming = () => {
+const startVideoStreaming = async () => {
+    console.log("Enter!!");
     while(true) {
         if(video.value) {
             if(socket.isConnected()) {
-                const ret:boolean = await socket.run("GET", `/video/${video.value?.title}/streaming`, (ret:Result) => {
+                const ret = await socket.run("GET", `/video/${video.value?.title}/streaming`, (ret:Result) => {
                     rawImg.value = ret.data;
                 })
                 .then((ret:boolean) => {
@@ -76,8 +77,7 @@ const startVideoStreaming = () => {
                     console.log("영상을 받아오는데 실패했습니다. 연결을 확인해주세요.");
                     return false;
                 });
-
-                if(ret == false)  {
+                if(ret == false) {
                     break;
                 }
             } else {

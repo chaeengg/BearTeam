@@ -32,7 +32,7 @@
             <input type="url" class="form-control" id="serverAddr" v-model="server" aria-describedby="urlHelp" required aria-required="true" placeholder="http://localhost:9000">
             <div id="urlHelp" class="form-text">서버 주소는 라즈베리 파이 주소입니다</div>
         </div>
-        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" @click="socket.connectServer(server)">Submit</button>
+        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" @click="socket.connectServer(server); server=''">Submit</button>
       </div>
     </div>
   </div>
