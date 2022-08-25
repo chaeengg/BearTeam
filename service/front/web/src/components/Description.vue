@@ -77,19 +77,33 @@ const format = (log:Log):string => {
         alert("위험합니다!");
     }
 
-    # msg2 = if (log.risk ==0):
+    /* msg2 = if (log.risk ==0):
                 print("장애물이 있습니다! 주의하세요!")
             else:
-                print("장애물이 접근합니다! 조심하세요!")
+                print("장애물이 접근합니다! 조심하세요!") */
+    /*
 
 
-    msg3 = if (log.objects.category == "bicycle"){
-            alert("자전거");
-    } elif (log.objects.category == "motocycle"){
-            alert("오토바이");
-    } else {
-        alert("킥보드");
+    */
+   
+    
+    cnt = objects.length
+    for(cnt)
+    {
+        
+        if (log.objects.category == "bicycle"){
+                msg3 = alert("자전거");
+        } elif (log.objects[i].category == "motocycle"){
+                msg3 = alert("오토바이");
+        } else {
+            msg3 = alert("킥보드");
+        }
+        }
+
+        if cnt > 1:
+            msg3 = alert("와");
+        cnt -= 1;
     }
-    }
+
             
 </script>
