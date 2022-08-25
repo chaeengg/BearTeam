@@ -268,3 +268,6 @@ dist
 # datasets
 data/datasets/Sample
 data/datasets/Target
+
+# Assets
+service/**/assets

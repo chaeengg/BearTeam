@@ -26,7 +26,7 @@ class Object(BaseModel):
     center: Tuple[float, float]
     width : float
     height: float
-    risk  : RiskCategory
+    risk  : RiskCategory 
 
     @validator('width', 'height', 'probability', 'center', each_item=True)
     def check_size(cls, v):

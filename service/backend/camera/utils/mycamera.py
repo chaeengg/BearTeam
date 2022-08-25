@@ -1,7 +1,7 @@
 from ..assets import storeConfig
 from common.types import *
 
-from .functions import make_bytes_from_img, make_frame_name
+from .functions import make_bytes_from_img, make_frame_name, make_img_from_bytes
 
 import base64
 import shutil
@@ -60,20 +60,31 @@ class MyCamera:
         return video
 
 
-    async def take_picture(self, video:Video)->Image:
+    async def capture(self, video:Video)->Image:
         """
-        사진을 찍고, asset에 저장,
-        Image로 반환!
+        사진을 찍고 Image로 반환!(RGBA -> RGB로 조정!)
         video 객체 수정은 하지 않는다(호출한 쪽에서 알아서 한당)
+        Prediction을 수행한 후, Log와 함께 해당 Frame을 저장한다.
         """
         frameId = len(video.frames) + 1
         name = await make_frame_name(video, frameId)
         img:PILImage = self._camera.capture_image().resize([video.width, video.height], PILImage.Resampling.NEAREST)
-        img.save(name)
         bytesImg = await make_bytes_from_img(img)
         img.close()
         return Image(captured=datetime.now(), width=video.width, height=video.height, risked=[], src=video.title, id=frameId, data=bytesImg)
         
+    async def save_frame(self, video:Video, image:Image) -> bool:
+        """
+        사진을 저장
+        """
+        try:
+            name = await make_frame_name(video, image.id)
+            img = await make_img_from_bytes(image.data, video.width, video.height)
+            img.save(name)
+            return True
+        except Exception as e:
+            print(e)
+            return False
 
     async def get_frame(self, video:Video, frame_id: int)->Image:
         imgPath:Path = await make_frame_name(video, frame_id)
