@@ -7,12 +7,12 @@ import numpy as np
 from pathlib import Path
 from PIL import Image as PILImage
 
-async def make_frame_name(video:Video, frame_id:int)->str:
+async def make_frame_name(video:Video, frame_id:int)->Path:
     return storeConfig['paths']['frames'] / video.title / (str(frame_id) + '.' + video.format)
 
 
 async def make_bytes_from_img(img:PILImage): 
-    bytesImg = np.array(img, dtype=np.uint8).tobytes() # R G B A -> R G B
+    bytesImg = np.array(img, dtype=np.uint8).tobytes()
     bytesImg = base64.b64encode(bytesImg)
 
     return bytesImg

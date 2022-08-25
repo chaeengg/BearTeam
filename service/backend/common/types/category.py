@@ -12,12 +12,14 @@ class ObjectCategory(Enum):
     MOTORCYCLE = 'motorcycle'
 
     def __int__(self):
-        if self == ObjectCategory.BICYCLE:
+        if self == ObjectCategory.MOTORCYCLE:
             return 0
-        elif self == ObjectCategory.KICKBOARD:
+        elif self == ObjectCategory.BICYCLE:
             return 1
-        elif self == ObjectCategory.MOTORCYCLE:
+        elif self == ObjectCategory.KICKBOARD:
             return 2
+        else:
+            return -1
 
 
 @unique

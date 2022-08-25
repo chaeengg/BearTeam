@@ -1,85 +1,86 @@
-from xmlrpc.client import boolean
 from common.types import *
 from camera.utils.mycamera import MyCamera
+from model.utils.mymodel import MyModel
 
-from typing import List, Dict
-
-import sched, time
+from typing import Dict
 
 from fastapi import APIRouter, Response, status
 
 router = APIRouter(prefix='/video', tags=['video'])
 
+model = MyModel()
 camera = MyCamera()
-videos: Dict[str, Video] = {}
-
-scheduler = sched.scheduler(time.time, time.sleep)
-
 
 
 @router.post('/{title}/start', response_model=Video)
 async def start_video(title, response:Response):
     """
-    카메라는 계속 사진을 찍고 있도록 만든다.
+    Video 시작! 메모리에 Video를 새롭게 올린다.
+    Model이 640 x 640 x 3 이미지로 훈련되어 있기에 해당 크기로 설정한다.
     """
-    global videos
-    videos = await camera.get_videos()
+    global model
+    global camera
 
-    if title not in videos:
-        videos[title] = await camera.start_video(title, 640, 640)
+    await camera.start_video(title, 640, 640)
 
-    return videos[title]
+    return camera.video
 
 
 @router.post('/{title}/end', response_model=Video)
-async def end_video(title, response:Response):
-    global videos
-    if title not in videos:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return None
-    else:
-        videos[title] = await camera.end_video(videos[title]) # duration update
-        return videos[title]
+async def end_video(title, savedTitle:str, response:Response):
+    global model
+    global camera
 
-@router.post('/{title}/checkpoint', response_model=boolean)
-async def make_checkpoint(title, response:Response):
-    """
-    Save latest frame for logging
-    """
-    global videos
-    if title not in videos or len(videos[title].frames) == 0:
+    if title != camera.video.title:
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
     else:
-        return await camera.save_frame(videos[title], videos[title].frames[-1])
+        await camera.end_video(savedTitle)
+        return camera.video
+
+
+@router.post('/{title}/save', response_model=bool)
+async def save_frame(title:str, img: Image, response:Response):
+    """
+    전송된 이미지를 저장한다. 저장하지 못했다면 False를 반환한다.
+    """
+    global model
+    global camera
+
+    if camera.video.title != title or img.src != camera.video.title:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return None
+    else:
+        return await camera.save_frame(img)
 
 
 @router.get('/{title}/streaming', response_model=Image)
 async def get_stream(title:str, response:Response):
     """
-    Take a picture
-    모델을 돌려서 bbox 예측도 필요!
+    사진을 찍어서 보내주기!
     """
-    global videos
-    if title not in videos.keys():
+    global model
+    global camera
+
+    if title != camera.video.title:
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
     else:
-        img:Image = await camera.capture(videos[title])
-        videos[title].frames.append(img)
+        img:Image = await camera.capture()
         return img
 
+@router.get('/{title}/{id}', response_model=Image)
+async def get_an_image(title:str, id:int, response:Response):
+    global model
+    global camera
 
-@router.get('/{title}/{frame_id}', response_model=Image)
-async def get_an_image(title, frame_id:int, response:Response):
-    """
-    Return a specific image
-    """
-    global videos
-    if title not in videos.keys() or int(frame_id) < 0 or int(frame_id) >= len(videos[title].frames):
+    if title != camera.video.title:
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
     else:
-        img:Image = await camera.get_frame(videos[title], frame_id)
-        videos[title].frames.append(img)
-        return img
+        try:
+            img:Image = await camera.get_frame(id)
+            return img
+        except FileNotFoundError:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return None

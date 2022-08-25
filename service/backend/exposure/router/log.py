@@ -1,76 +1,87 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, status
 from datetime import datetime
 
 from common.types import *
 from model.utils.mymodel import MyModel
 
+from camera.utils.mycamera import MyCamera
+
 model = MyModel()
+camera = MyCamera()
 
 router = APIRouter(prefix='/log', tags=['log'],)
 
-@router.post('/{title}/start', response_model=Video)
-async def start_video(title, response:Response):
+@router.post('/{title}/start', response_model = Log)
+async def start_log(title, response:Response):
     """
-    카메라는 계속 사진을 찍고 있도록 만든다.
+    Start Log id는 현재 Video의 가장 최신 Frame id이다.
+    Log는 지금부터 찍히는 것이므로!
     """
-    global videos
-    videos = await camera.get_videos()
+    global model
+    global camera
 
-    if title not in videos:
-        videos[title] = await camera.start_video(title, 640, 640)
-
-    return videos[title]
-
-
-@router.post('/{title}/end', response_model=Video)
-async def end_video(title, response:Response):
-    global videos
-    if title not in videos:
+    if title != camera.video.title:
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
     else:
-        videos[title] = await camera.end_video(videos[title]) # duration update
-        return videos[title]
+        log = Log(src=title, id=camera.video.frames[-1].id, recorded=datetime.now(), objects=[], risked=[], risk=RiskCategory.LOW)
+        await model.add_log(log)
+        return log
 
-@router.post('/{title}/checkpoint', response_model=boolean)
-async def make_checkpoint(title, response:Response):
+@router.post('/{title}/end', response_model=Log)
+async def end_log(title, savedTitle:str, response:Response):
     """
-    Save latest frame for logging
+    지금까지 기록된 Log를 저장하고, Dummy Log를 반환한다.
     """
-    global videos
-    if title not in videos or len(videos[title].frames) == 0:
+    global model
+    global camera
+
+    if title != model.logSrc:
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
     else:
-        return await camera.save_frame(videos[title], videos[title].frames[-1])
+        await model.end_log(title, savedTitle)
+        return Log(src=savedTitle, id = -1, recorded=datetime.now(), objects=[], risked=[], risk=RiskCategory.LOW)
 
+@router.post('/{title}/save', response_model=None)
+async def save_log(title, response:Response):
+    """
+    Memory 상에 해당 Source의 Log가 없다면, 404 Error를 반환한다.
+    """
+    global model
+    global camera
 
-@router.get('/{title}/streaming', response_model=Image)
-async def get_stream(title:str, response:Response):
+    if not await model.save_log(title):
+        response.status_code = status.HTTP_404_NOT_FOUND
+    return None
+
+@router.get('/{title}/prediction', response_model=Log)
+async def predict(title:str, img:Image, response:Response):
     """
-    Take a picture
-    모델을 돌려서 bbox 예측도 필요!
+    수신된 Image에 대해 Prediction 수행
     """
-    global videos
-    if title not in videos.keys():
+    global model
+    global camera
+
+    if title != model.logSrc:
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
     else:
-        img:Image = await camera.capture(videos[title])
-        videos[title].frames.append(img)
-        return img
+        log:Log = await model.write(img)
+        return log
 
+@router.get('/{title}/{id}', response_model=Log)
+async def get_an_log(title:str, id:int, response:Response):
+    global model
+    global camera
 
-@router.get('/{title}/{frame_id}', response_model=Image)
-async def get_an_image(title, frame_id:int, response:Response):
-    """
-    Return a specific image
-    """
-    global videos
-    if title not in videos.keys() or int(frame_id) < 0 or int(frame_id) >= len(videos[title].frames):
+    if title != model.logSrc:
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
     else:
-        img:Image = await camera.get_frame(videos[title], frame_id)
-        videos[title].frames.append(img)
-        return img
+        try:
+            log = await model.get_log(title, id)
+            return log
+        except FileNotFoundError:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return None 

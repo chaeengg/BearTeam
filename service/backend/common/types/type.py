@@ -61,8 +61,8 @@ class Image(BaseModel):
     Risked are the highest risked objects \n
     """
     captured: datetime
-    width: float
-    height: float
+    width: int
+    height: int
     risked: List[Object]
 
     src: str
@@ -101,11 +101,15 @@ class Image(BaseModel):
 # @dataclass(config=LogConfig)
 class Log(BaseModel):
     """
-    Recorded is a recorded time
-    Objects are all tracked objects
-    Risked are the highest riskable objects's indice
+    Src is the associated video \n
+    id is an unique value in each video \n
+    Recorded is a recorded time \n
+    Objects are all tracked objects \n
+    Risked are the highest riskable objects's indice \n
     Risk is a total risk of the scene
     """
+    src: str 
+    id: int
     recorded: datetime
     objects: List[Object]
     risked: List[int]
@@ -121,6 +125,8 @@ class Log(BaseModel):
         schema_extra = {
             "example": 
                 {
+                    "src"     : "BearTeam",
+                    "id"      : 0,
                     "recorded": datetime.now(timezone('Asia/Seoul')),
                     "objects" : ['object1(risk = 2)', 'object2(risk = 1)', 'object3(risk = 2)'],
                     "risked"  : [0, 2],

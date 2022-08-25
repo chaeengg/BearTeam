@@ -1,31 +1,33 @@
-from ..assets import storeConfig
+from .functions import *
 from common.types import *
+from common.utils import Singleton
 
-from .functions import make_bytes_from_img, make_frame_name, make_img_from_bytes
+from ..assets import storeConfig
 
-import base64
-import shutil
 import os
-import subprocess
-import numpy as np
 import json
+import shutil
+import subprocess
 from pathlib import Path
-from typing import Tuple, Dict
 from datetime import datetime
-from picamera2 import Picamera2, Preview
+
+from typing import Dict
 
 from PIL import Image as PILImage
+from picamera2 import Picamera2, Preview
 
-class MyCamera:
+
+class MyCamera(metaclass=Singleton):
     def __init__(self):
+        """
+        video : 현재 저장되고 있는 영상!
+        """
+        self._video:Video = None
         self._camera = Picamera2()
         self._configure_camera()
         self._camera.start()
 
     def __del__(self):
-        """
-        video info가 저장되지 않은 frames는 모두 삭제한다.
-        """
         self._camera.close()
 
     def _configure_camera(self):
@@ -34,78 +36,75 @@ class MyCamera:
         config['buffer_count'] = 5
         self._camera.configure(config)
     
-    async def start_video(self, title:str, width:float, height:float)->Video:
-        video = Video(mode="RGB", title=title, format="jpeg", duration={"start":datetime.now(), "end":datetime.now()}, width=width, height=height, frames=[])
+    @property
+    def video(self):
+        return self._video
+
+    async def start_video(self, title:str, width:float, height:float)->None:
+        """
+        video를 새로 지정하고, 해당 비디오와 동일한 구성요소가 디스크에 있으면 지운다.
+        """
+        self._video = Video(mode="RGBA", title=title, format="jpeg", duration={"start":datetime.now(), "end":datetime.now()}, width=width, height=height, frames=[])
+        
         if (storeConfig['paths']['frames'] / title).exists():
             shutil.rmtree(storeConfig['paths']['frames'] / title)
-
-        os.makedirs(storeConfig['paths']['frames'] / title)
-        return video
-
         
+        if (storeConfig['paths']['videos'] / title).exists():
+            shutil.rmtree(storeConfig['paths']['videos'] / title)
 
-    async def end_video(self, video:Video) -> Video:
+        os.makedirs(storeConfig['paths']['frames'] / title, exist_ok=False)
+        return None
+
+
+    async def end_video(self, savedTitle:str) -> None:
         """
-        저장된 파일을 datetime을 덧붙여 새롭게 저장하기
+        Video 저장하기
         """
-        video.duration["end"] = datetime.now()
-
-        savedTitle = video.title + ':' + '[' + str(video.duration["start"]) + ',' + str(video.duration["end"]) + ']'
-
-        video.title = savedTitle
-        subprocess.run(['mv', storeConfig['paths']['frames'] / video.title, storeConfig['paths']['frames'] / savedTitle])
+        subprocess.run(['mv', storeConfig['paths']['frames'] / self.video.title, storeConfig['paths']['frames'] / savedTitle])
         
+        self.video.title = savedTitle
+        self.video.duration["end"] = datetime.now()
+
         with open(storeConfig['paths']['videos'] / f"{savedTitle}.json", "w") as fd:
-            fd.write(video.json())
-        return video
+            fd.write(self.video.json())
+        return None
 
 
-    async def capture(self, video:Video)->Image:
+    async def capture(self)->Image:
         """
-        사진을 찍고 Image로 반환!(RGBA -> RGB로 조정!)
-        video 객체 수정은 하지 않는다(호출한 쪽에서 알아서 한당)
-        Prediction을 수행한 후, Log와 함께 해당 Frame을 저장한다.
+        사진을 찍고 Image로 반환!
         """
-        frameId = len(video.frames) + 1
-        name = await make_frame_name(video, frameId)
-        img:PILImage = self._camera.capture_image().resize([video.width, video.height], PILImage.Resampling.NEAREST)
+        frame = Frame(id=len(self.video.frames) + 1, captured=datetime.now())
+        img:PILImage = self._camera.capture_image().resize([self.video.width, self.video.height], PILImage.Resampling.NEAREST)
         bytesImg = await make_bytes_from_img(img)
         img.close()
-        return Image(captured=datetime.now(), width=video.width, height=video.height, risked=[], src=video.title, id=frameId, data=bytesImg)
+
+        self.video.frames.append(frame)
+        return Image(captured=frame.captured, width=self.video.width, height=self.video.height, risked=[], src=self.video.title, id=frame.id, data=bytesImg)
         
-    async def save_frame(self, video:Video, image:Image) -> bool:
+    async def save_frame(self, image:Image) -> bool:
         """
-        사진을 저장
+        이미지 저장!
         """
         try:
-            name = await make_frame_name(video, image.id)
-            img = await make_img_from_bytes(image.data, video.width, video.height)
+            name = await make_frame_name(self.video, image.id)
+            img = await make_img_from_bytes(image.data, self.video.width, self.video.height)
             img.save(name)
             return True
         except Exception as e:
             print(e)
             return False
 
-    async def get_frame(self, video:Video, frame_id: int)->Image:
-        imgPath:Path = await make_frame_name(video, frame_id)
+    async def get_frame(self, id: int)->Image:
+        """
+        Video의 특정 프레임 이미지 가져오기!
+        """
+        imgPath:Path = await make_frame_name(self.video, id)
         if not imgPath.exists():
             raise FileNotFoundError
         else:
-            img = PILImage.open(imgPath).resize([video.width, video.height], PILImage.Resampling.BICUBIC)
+            img = PILImage.open(imgPath).resize([self.video.width, self.video.height], PILImage.Resampling.BICUBIC)
             data = make_bytes_from_img(img)
             img.close()
-            return Image(captured=video.frames[frame_id].captured, width=video.width, height=video.height, risked=[], src=video.title, id = frame_id, data=data)
-
-
-    async def get_videos(self)->Dict[str, Video]:
-        videos = dict()
-        for videoPath in storeConfig['paths']['videos'].iterdir():
-            try:
-                with open(videoPath, 'r') as fd:
-                        video:Video = Video(**json.load(fd))
-                        videos[video.title] = video
-            except Exception:
-                continue
-        
-        return videos
+            return Image(captured=self.video.frames[id].captured, width=self.video.width, height=self.video.height, risked=[], src=self.video.title, id = id, data=data)
         
