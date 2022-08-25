@@ -24,8 +24,8 @@ async def start_log(title, response:Response):
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
     else:
-        log = Log(src=title, id=camera.video.frames[-1].id, recorded=datetime.now(), objects=[], risked=[], risk=RiskCategory.LOW)
-        await model.add_log(log)
+        log = await model.start_log(title)
+        log.id = camera.video.frames[-1].id if len(camera.video.frames) > 0 else 0
         return log
 
 @router.post('/{title}/end', response_model=Log)
@@ -35,6 +35,10 @@ async def end_log(title, savedTitle:str, response:Response):
     """
     global model
     global camera
+
+    if not model.isConnected:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return None     
 
     if title != model.logSrc:
         response.status_code = status.HTTP_404_NOT_FOUND
@@ -51,6 +55,10 @@ async def save_log(title, response:Response):
     global model
     global camera
 
+    if not model.isConnected:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return None     
+
     if not await model.save_log(title):
         response.status_code = status.HTTP_404_NOT_FOUND
     return None
@@ -63,6 +71,10 @@ async def predict(title:str, img:Image, response:Response):
     global model
     global camera
 
+    if not model.isConnected:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return None     
+
     if title != model.logSrc:
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
@@ -74,6 +86,10 @@ async def predict(title:str, img:Image, response:Response):
 async def get_an_log(title:str, id:int, response:Response):
     global model
     global camera
+
+    if not model.isConnected:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return None     
 
     if title != model.logSrc:
         response.status_code = status.HTTP_404_NOT_FOUND

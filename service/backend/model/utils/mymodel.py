@@ -1,6 +1,6 @@
 from common.types import *
 from common.utils import *
-from ..assets import storeConfig
+from model.assets import modelStoreConfig
 
 from .functions import *
 
@@ -20,6 +20,7 @@ class MyModel(metaclass=Singleton):
         """
         self._logs:List[Log] = []
         self.maxRecord = maxRecord
+        self._isConnected = False
 
     @property
     def logs(self):
@@ -30,7 +31,11 @@ class MyModel(metaclass=Singleton):
         if len(self.logs) == 0:
             return ""
         else:
-            return self.logs[0]
+            return self.logs[0].src
+
+    @property
+    def isConnected(self):
+        return self._isConnected
 
     async def add_log(self, log:Log)->None:
         """
@@ -51,14 +56,15 @@ class MyModel(metaclass=Singleton):
         return None
 
     async def start_log(self, title) -> Log:
-        log = Log(src=title, recorded=datetime.now(), objects=[], risked=[], risk=RiskCategory.LOW)
-        
-        if (storeConfig["path"]['logs'] / title).exists():
-            shutil.rmtree(storeConfig['paths']['logs'] / title)
-        os.makedirs(storeConfig['paths']['logs'] / title, exist_ok=False)
+        log = Log(src=title, id = 0, recorded=datetime.now(), objects=[], risked=[], risk=RiskCategory.LOW)
+    
+        if (modelStoreConfig["paths"]['logs'] / title).exists():
+            shutil.rmtree(modelStoreConfig['paths']['logs'] / title)
+        os.makedirs(modelStoreConfig['paths']['logs'] / title, exist_ok=True)
         
         await self.add_log(log)
 
+        self._isConnected = True
         return log
 
     async def end_log(self, src:str, savedSrc:str) -> None:
@@ -67,7 +73,9 @@ class MyModel(metaclass=Singleton):
         이후, log의 src를 savedSrc로 바꾼다.
         """
         await self.save_log(src, removed=True)
-        subprocess.run(['mv', storeConfig['paths']['logs'] / src, storeConfig['paths']['logs'] / savedSrc])
+        subprocess.run(['mv', modelStoreConfig['paths']['logs'] / src, modelStoreConfig['paths']['logs'] / savedSrc])
+        
+        self._isConnected = False
         return None
 
     async def save_log(self, src:str, removed=False) -> bool:

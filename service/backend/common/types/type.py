@@ -1,6 +1,9 @@
 from .config import *
 from .category import *
 
+import json
+from dummyData import dummyStoreConfig
+
 import base64
 from typing import List, Tuple, Optional, Dict
 from pydantic import root_validator, validator, Field, BaseModel
@@ -37,16 +40,12 @@ class Object(BaseModel):
 
     class Config:
         title = "ObjectSchema"
+        dummy = None
+        if dummyStoreConfig['paths']['Object'].exists():
+            with open(dummyStoreConfig['paths']['Object'], 'r') as fd:
+                dummy = json.load(fd)
         schema_extra = {
-            "example":
-                {
-                    'category'    : 'bicycle, motorcycle, kickboard',
-                    'probability' : 0.5, 
-                    'center'      : ['x', 'y'],
-                    'width'       : '[0.0, 1.0]',
-                    'height'      :  '[0.0, 1.0',
-                    'risk'        :  '0: low, 1: mid, 2: high'
-                },
+            "example":   dummy
         }
 
 # @dataclass(config=ImageConfig)
@@ -83,19 +82,12 @@ class Image(BaseModel):
 
     class Config:
         title = "ImageSchema"
+        dummy = None
+        if dummyStoreConfig['paths']['Image'].exists():
+            with open(dummyStoreConfig['paths']['Image'], 'r') as fd:
+                dummy = json.load(fd)
         schema_extra = {
-            "example":
-                {
-                    'src'      : 'record001',
-                    'id'       : '1',
-                    'title'    : 'record001_1.jpeg',
-                    'captured' : datetime.now(timezone('Asia/Seoul')),
-                    'width'    : 640,
-                    'height'   : 640,
-                    'risked'   : ['object1', 'object2'],
-                    "data"     : "3-channel Image Array [0 - 255] channel values",
-
-                },
+            "example":   dummy
         }
 
 # @dataclass(config=LogConfig)
@@ -122,16 +114,12 @@ class Log(BaseModel):
 
     class Config:
         title = "LogSchema"
+        dummy = None
+        if dummyStoreConfig['paths']['Log'].exists():
+            with open(dummyStoreConfig['paths']['Log'], 'r') as fd:
+                dummy = json.load(fd)
         schema_extra = {
-            "example": 
-                {
-                    "src"     : "BearTeam",
-                    "id"      : 0,
-                    "recorded": datetime.now(timezone('Asia/Seoul')),
-                    "objects" : ['object1(risk = 2)', 'object2(risk = 1)', 'object3(risk = 2)'],
-                    "risked"  : [0, 2],
-                    "risk"    : "The highest risk in the scene" 
-                },
+            "example":   dummy
         }
 
 # @dataclass(config=FrameConfig)
@@ -149,12 +137,12 @@ class Frame(BaseModel):
 
     class Config:
         title = "FrameSchema"
+        dummy = None
+        if dummyStoreConfig['paths']['Frame'].exists():
+            with open(dummyStoreConfig['paths']['Frame'], 'r') as fd:
+                dummy = json.load(fd)
         schema_extra = {
-            "example":
-                {
-                    "id" : 0,
-                    "captured": datetime.now(timezone('Asia/Seoul')),
-                }
+            "example":   dummy
         }
 
 # @dataclass(config=VideoConfig)
@@ -188,14 +176,10 @@ class Video(BaseModel):
 
     class Config:
         title = "VideoConfig"
+        dummy = None
+        if dummyStoreConfig['paths']['Video'].exists():
+            with open(dummyStoreConfig['paths']['Video'], 'r') as fd:
+                dummy = json.load(fd)
         schema_extra = {
-            "example":
-                {
-                    "mode"  : "RGB",
-                    "title" : "default",
-                    "duration" : "{start: start-time, end: end-time}",
-                    "width" : 320,
-                    "height": 320,
-                    "frames": "['frame1', 'frame2', ...]"
-                }
+            "example":   dummy
         }

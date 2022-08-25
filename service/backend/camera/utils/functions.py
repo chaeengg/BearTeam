@@ -1,5 +1,5 @@
 from common.types import *
-from ..assets import storeConfig
+from camera.assets import cameraStoreConfig
 
 import io
 import base64
@@ -8,7 +8,7 @@ from pathlib import Path
 from PIL import Image as PILImage
 
 async def make_frame_name(video:Video, frame_id:int)->Path:
-    return storeConfig['paths']['frames'] / video.title / (str(frame_id) + '.' + video.format)
+    return str(cameraStoreConfig['paths']['frames'] / video.title / (video.title + "_" + str(frame_id)))
 
 
 async def make_bytes_from_img(img:PILImage): 

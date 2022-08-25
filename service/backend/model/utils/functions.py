@@ -1,4 +1,4 @@
-from ..assets import storeConfig
+from model.assets import modelStoreConfig
 
 from pathlib import Path
 
@@ -129,4 +129,4 @@ async def find_sameObjects(logs:List[Log]) -> List[List[Object]]:
 
 
 async def make_log_name(src:str, id:int)->Path:
-    return storeConfig['paths']['logs'] / src / (str(id) + '.json')
+    return modelStoreConfig['paths']['logs'] / src / (src + '_' + str(id) + '.json')

@@ -31,6 +31,10 @@ async def end_video(title, savedTitle:str, response:Response):
     global model
     global camera
 
+    if not camera.isConnected:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return None
+
     if title != camera.video.title:
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
@@ -47,6 +51,10 @@ async def save_frame(title:str, img: Image, response:Response):
     global model
     global camera
 
+    if not camera.isConnected:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return None
+
     if camera.video.title != title or img.src != camera.video.title:
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
@@ -62,6 +70,10 @@ async def get_stream(title:str, response:Response):
     global model
     global camera
 
+    if not camera.isConnected:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return None
+
     if title != camera.video.title:
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
@@ -73,6 +85,10 @@ async def get_stream(title:str, response:Response):
 async def get_an_image(title:str, id:int, response:Response):
     global model
     global camera
+
+    if not camera.isConnected:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return None
 
     if title != camera.video.title:
         response.status_code = status.HTTP_404_NOT_FOUND
