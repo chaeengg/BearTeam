@@ -67,10 +67,29 @@ const format = (log:Log):string => {
     log.objects;
     log.recorded;
     log.risk;
-    log.risked
-    return "";
-}
+    log.risked;
+    msg1 = "날짜: {log.recorded}";
+    msg2 = if (log.risk == 0){
+            alert("주의하세요!");
+    } elif (log.risk == 1){
+        alert("조심하세요!");
+    } else {
+        alert("위험합니다!");
+    }
+
+    # msg2 = if (log.risk ==0):
+                print("장애물이 있습니다! 주의하세요!")
+            else:
+                print("장애물이 접근합니다! 조심하세요!")
 
 
-
+    msg3 = if (log.objects.category == "bicycle"){
+            alert("자전거");
+    } elif (log.objects.category == "motocycle"){
+            alert("오토바이");
+    } else {
+        alert("킥보드");
+    }
+    }
+            
 </script>
