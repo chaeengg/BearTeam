@@ -7,6 +7,7 @@ import Info from '/@components/Info.vue'
 import Screen from '/@components/Screen.vue';
 import NavBar from '/@components/NavBar.vue';
 import Profile from '/@components/Profile.vue';
+import Description from '/@components/Description.vue';
 
 
 
@@ -22,12 +23,12 @@ const app = createApp(App);
 
 app.use(router);
 
-
 app.component(Home.name, Home);
 app.component(Demo.name, Demo);
 app.component(Info.name, Info);
 app.component(Screen.name, Screen);
 app.component(NavBar.name, NavBar);
 app.component(Profile.name, Profile);
+app.component(Description.name, Description);
 
 app.mount('#app');

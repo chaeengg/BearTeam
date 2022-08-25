@@ -1,12 +1,13 @@
 import {Result} from '/@types'
 import { ref, Ref } from 'vue';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { AxiosRequestConfig } from 'axios';
 
 export type METHOD = 'GET' | 'POST';
 
 export class Socket {
     private server: string;
+    private connected: boolean = false;
     public readonly currentServer: Ref<string>;
 
     public constructor(server:string) {
@@ -14,8 +15,25 @@ export class Socket {
         this.currentServer = ref(server);
     }
     
-    public changeServer(server:string) {
+    public connectServer(server:string):null {
         this.server = server;
+        this.run("GET", '/', (res:Result) => {
+            console.log(res.data);
+        })
+        .then((ret:boolean) => {
+            if(ret == false) {
+                alert("서버가 연결되지 않았습니다. 주소를 확인해주세요.");
+                this.connected = false;
+            } else {
+                alert("서버가 연결되었습니다. 서비스를 시작합니다.");
+                this.connected = true;
+            }
+        });
+        return null
+    };
+
+    public isConnected():boolean {
+        return this.connected;
     }
 
     public async run(method: METHOD, url:string, onSucess:(arg0:Result)=>void, onFailed?:()=>void, params?:{string:string}, data?: {string:any},):Promise<boolean> {
@@ -42,9 +60,10 @@ export class Socket {
     private async get(url:string, params?: {string: string}, ):Promise<Result> {
         const config:AxiosRequestConfig = {params: params};
         try {
-            const res: Response = await axios.get(url, config);
+            const res: AxiosResponse = await axios.get(url, config);
+            console.log(res);
             if(res.status == 200) {
-                return {code: res.status, msg:res.statusText, data:res.body};
+                return {code: res.status, msg:res.statusText, data:res.data};
             } else {
                 return {code: res.status, msg:res.statusText};
             }
@@ -56,9 +75,9 @@ export class Socket {
 
     private async post(url:string, data?: {string:any}, ): Promise<Result> {
         try {
-            const res: Response = await axios.post(url, data);
+            const res: AxiosResponse = await axios.post(url, data);
             if(res.status == 200) {
-                return {code: res.status, msg:res.statusText, data:res.body};
+                return {code: res.status, msg:res.statusText, data:res.data};
             } else {
                 return {code: res.status, msg:res.statusText};
             }

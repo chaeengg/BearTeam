@@ -13,6 +13,7 @@ export default defineConfig({
             '/@modules': path.resolve(__dirname, './src/modules'),
             '/@router': path.resolve(__dirname, './src/router'),
             '/@types': path.resolve(__dirname, './src/types'),
+            '/@secrets': path.resolve(__dirname, './src/secrets.json'),
         }
     }
 })
