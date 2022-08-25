@@ -37,16 +37,16 @@
     </div>
   </div>
 </div>
-<main class="px-3 text-center mx-auto" style="width:40rem">
-    <div class="container my-1" >
+<main class="px-auto text-center mx-auto" style="width:40rem">
+    <div class="container px-0 my-1">
         <div class="row">
-            <div class="col">
+            <div class="col-sm-2">
             </div>
             <div class="col">
-                <h5 class = "h5">{{video?.title ? video.title : "우리는 곰돌이팀!"}}</h5>
+                <h5 class = "pb-0 pt-2 mb-0 mt-1">{{video?.title ? video.title : "우리는 곰돌이팀!"}}</h5>
             </div>
-            <div class="col float-bs-right">
-                <button type="button" class="btn btn-light" @click.prevent="endVideo">종료</button>
+            <div class="col-sm-2 float-bs">
+                <button type="button" class="btn btn-light pt-2 pb-1" style="float:right" @click.prevent="endVideo">종료</button>
             </div>
         </div>
     </div>
@@ -129,8 +129,15 @@ provide("video", video);
 </script>
 
 <style scoped>
-.h5{
+h5{
   font-family:"LeferiPoint-WhiteObliqueA";
   font-size:1.5rem;
+}
+
+div.col{
+    font-family:"LeferiPoint-WhiteObliqueA";
+}
+.btn{
+    font-family:"LeferiPoint-WhiteObliqueA";
 }
 </style>
