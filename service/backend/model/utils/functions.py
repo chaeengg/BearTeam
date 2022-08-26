@@ -1,3 +1,4 @@
+
 from model.assets import modelStoreConfig
 
 from pathlib import Path
@@ -105,7 +106,6 @@ async def get_gradient(objs:List[Object]):
     else:
         return 0.5
     
-        
 async def find_sameObjects(logs:List[Log]) -> List[List[Object]]:
     """
     로그가 저장된 프레임마다 동일한 Object들을 찾아서 시간순으로 정렬한다.(0: 가장 오래된 것, -1: 가장 최신)
