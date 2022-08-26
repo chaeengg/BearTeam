@@ -56,7 +56,7 @@ watch(receivedImg, async (cur:Ref<RawImage|null>, prv:Ref<RawImage|null>) => {
 
 const predict = async (img:RawImage) => {
     if(server.value.length > 0 && connected.value && video.value){
-        axios.post(server + `/log/${video.value.title}/prediction`, JSON.stringify(img), {
+        axios.post(server.value + `/log/${video.value.title}/prediction`, JSON.stringify(img), {
             headers: { "Content-Type": `application/json`},
         })
         .then((res: AxiosResponse) => {
@@ -76,11 +76,11 @@ const predict = async (img:RawImage) => {
 
 const checkpoint = async (img:RawImage) => {
 if(server.value.length > 0 && connected.value && video.value){
-        axios.post(server + `/video/${video.value.title}/save`, JSON.stringify(img), {
+        axios.post(server.value + `/video/${video.value.title}/save`, JSON.stringify(img), {
             headers: { "Content-Type": `application/json`},
         })
         .then((res: AxiosResponse) => {
-            return axios.post(server + `/log/${video.value?.title}/save`);
+            return axios.post(server.value + `/log/${video.value?.title}/save`);
         })
         .catch((reason) => {
             console.log("체크포인트 생성에 실패했습니다..");

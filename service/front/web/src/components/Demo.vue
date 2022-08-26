@@ -32,7 +32,7 @@
             <input type="url" class="form-control" id="serverAddr" v-model="server" aria-describedby="urlHelp" required aria-required="true" placeholder="http://localhost:9000">
             <div id="urlHelp" class="form-text">서버 주소는 라즈베리 파이 주소입니다</div>
         </div>
-        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" @click="connectServer(); server=''">Submit</button>
+        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" @click="connectServer();">Submit</button>
       </div>
     </div>
   </div>
@@ -74,7 +74,7 @@ import Description from './Description.vue';
 import axios, {Axios, AxiosResponse} from 'axios';
 
 const server:Ref<string> = ref("");
-let connected:boolean = false;
+const connected:Ref<boolean> = ref(false);
 
 const video: Ref<RawVideo | null> = ref(null);
 const latestLog: Ref<Log | null> = ref(null);
@@ -87,24 +87,25 @@ const connectServer = () => {
         .then((res:AxiosResponse) => {
             console.log("서버 연결 성공");
             alert("서버에 연결되었습니다.");
-            connected = true;
+            connected.value = true;
         })
         .catch((reson) => {
             console.log("연결 실패!!!");
             console.log(reson);
             alert("서버 연결을 실패했습니다.");
-            connected = false;
+            connected.value = false;
         })
+        // .finally(()=> console.log(server));
 };
 
 
 const startVideo = () => {
     if(connected) {
         if(title.value.length > 0){
-        axios.post(server + `/video/${title.value}/start`)
+        axios.post(server.value + `/video/${title.value}/start`)
             .then((ret:AxiosResponse) => {
                 video.value = ret.data;
-                return axios.post(server + `/log/${title.value}/start`);
+                return axios.post(server.value + `/log/${title.value}/start`);
             })
             .then((ret:AxiosResponse) => {
                 latestLog.value = ret.data;
@@ -125,9 +126,9 @@ const startVideo = () => {
 
 const endVideo = () => {
     if(connected) {
-        axios.post(server + `/video/${video.value?.title}/recorded/end`)
+        axios.post(server.value + `/video/${video.value?.title}/recorded/end`)
             .then((ret:AxiosResponse) => {
-                return axios.post(server + `/log/${video.value?.title}/recorded/end`);
+                return axios.post(server.value + `/log/${video.value?.title}/recorded/end`);
             })
             .then((ret:AxiosResponse) => {
                 alert("영상을 종료합니다.");
@@ -138,7 +139,6 @@ const endVideo = () => {
             })
             .finally(() => {
                 //정상 종료든 아니든 정리한다.
-                connected = false;
                 video.value = null;
                 latestLog.value = null;
             });

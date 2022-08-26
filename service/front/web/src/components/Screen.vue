@@ -1,8 +1,10 @@
 <template>
     <div class="embed-responsive embed-responsive-1by1">
-        <canvas id="screen" ref="canvas">
+        <!-- <canvas id="screen" ref="canvas">
         최신 버전의 크롬을 이용해주세요!
-        </canvas>
+        </canvas> -->
+        <video src="../../demo/demo01.mp4" autoplay controls></video>
+        
     </div>
 </template>
 
@@ -44,7 +46,7 @@ onMounted(() => {
 let width: number = 1;
 let height: number = 1;
 watch(video, async (currentVideo:Ref<RawVideo | null>, oldVideo:Ref<RawVideo | null>) => {
-    if(currentVideo) {
+    if(video.value != null) {
         width = (video.value?.width) ? video.value?.width : 1;
         height = (video.value?.height) ? video.value?.height : 1;
 
@@ -54,10 +56,11 @@ watch(video, async (currentVideo:Ref<RawVideo | null>, oldVideo:Ref<RawVideo | n
 });
 
 const startVideoStreaming = async () => {
-    while(true) {
+    // while(true) {
         if(video.value && connected.value && server.value.length != 0) {
-            axios.get(server + `/video/${video.value.title}/streaming`)
+            axios.get(server.value + `/video/${video.value.title}/streaming`)
                 .then((ret:AxiosResponse) => {
+                    
                     receivedImg.value = ret.data;
                     return setImage();
                 })
@@ -73,21 +76,42 @@ const startVideoStreaming = async () => {
             console.log(`video: ${video.value}\nconnected: ${connected.value}\nserver: ${server.value}`);
             imgData.value.data.fill(0);
             ctx.value?.putImageData(imgData.value, 0, 0);
-            break;
+            // break;
         }
-    }
+    // }
 };
 
 const setImage = async () => {
     if(video.value && ctx.value && receivedImg.value) {
         const bytes = Uint8Array.from(atob(receivedImg.value.data), c => c.charCodeAt(0));
         imgData.value.data.set(bytes);
-        ctx.value.putImageData(imgData.value, 0, 0);
+        // ctx.value.putImageData(imgData.value, 0, 0);
+        draw(imgData.value)
         return true;
     }  else {
         return Promise.reject(`video: ${video.value}\nctx: ${ctx.value}\nreceivedImg: ${receivedImg.value}`);
     }
 };
+
+function draw(imgData:ImageData) {
+    if(video.value) {
+        const arrayBuffer = new ArrayBuffer(video.value.width * video.value.height * 4);
+        const pixels = new Uint8ClampedArray(arrayBuffer);
+        for (let y = 0; y < video.value.height; y++) {
+        for (let x = 0; x < video.value.width; x++) {
+            const i = (y*video.value.width + x) * 4;
+            pixels[i  ] = x;   // red
+            pixels[i+1] = y;   // green
+            pixels[i+2] = 0;   // blue
+            pixels[i+3] = 255; // alpha
+        }
+    }
+    }
+}
+
+// const imageData = new ImageData(pixels, WIDTH, HEIGHT);
+// ctx.putImageData(imageData, 0, 0);
+// }
 
 // watch(latestLog, (cur:Ref<Log | null>, prv:Ref<Log | null>) => {
 //     if(cur.value != null && ctx.value && canvas.value) {
@@ -124,9 +148,11 @@ const setImage = async () => {
 </script>
 
 <style scoped>
-canvas {
+canvas, video {
     border: 0.1rem solid #fff; 
-    height: 20rem; 
-    width: 40rem;
+    /* height: 20rem; 
+    width: 40rem; */
+    height: 13rem;
+    width: 8rem;
 }
 </style>
