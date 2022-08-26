@@ -29,7 +29,7 @@
       </div>
       <div class="modal-body">
         <div class="mb-3">
-            <input type="url" class="form-control" id="serverAddr" v-model="server" aria-describedby="urlHelp" required aria-required="true" placeholder="http://localhost:9000">
+            <input type="url" class="form-control" id="serverAddr" v-model="_server" aria-describedby="urlHelp" required aria-required="true" placeholder="http://localhost:9000">
             <div id="urlHelp" class="form-text">서버 주소는 라즈베리 파이 주소입니다</div>
         </div>
         <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" @click="connectServer();">Submit</button>
@@ -65,14 +65,14 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import {reactive, ref, Ref, onMounted, provide, watch} from 'vue';
+import axios, {AxiosResponse} from 'axios';
+import {ref, Ref, provide, watch} from 'vue';
 
-import {Result, RawVideo, Log, RiskCategory, RawImage} from '../types';
 import Screen from './Screen.vue';
 import Description from './Description.vue';
+import {RawVideo, Log, RawImage} from '/@types';
 
-import axios, {Axios, AxiosResponse} from 'axios';
-
+const _server:Ref<string> = ref("");
 const server:Ref<string> = ref("");
 const connected:Ref<boolean> = ref(false);
 
@@ -83,6 +83,7 @@ const receivedImg:Ref<RawImage | null > = ref(null);
 const title:Ref<string> = ref("");
 
 const connectServer = () => {
+    server.value = _server.value;
     axios.get(server.value)
         .then((res:AxiosResponse) => {
             console.log("서버 연결 성공");
@@ -95,9 +96,11 @@ const connectServer = () => {
             alert("서버 연결을 실패했습니다.");
             connected.value = false;
         })
-        // .finally(()=> console.log(server));
+        .finally(()=> {
+            console.log(server)
+            _server.value = "";
+        });
 };
-
 
 const startVideo = () => {
     if(connected) {
@@ -126,9 +129,9 @@ const startVideo = () => {
 
 const endVideo = () => {
     if(connected) {
-        axios.post(server.value + `/video/${video.value?.title}/recorded/end`)
+        axios.post(server.value + `/video/${video.value?.title}/end?savedTitle=recorded`)
             .then((ret:AxiosResponse) => {
-                return axios.post(server.value + `/log/${video.value?.title}/recorded/end`);
+                return axios.post(server.value + `/log/${video.value?.title}/end?savedTitle=recorded`);
             })
             .then((ret:AxiosResponse) => {
                 alert("영상을 종료합니다.");
@@ -138,19 +141,57 @@ const endVideo = () => {
                 alert("영상을 종료할 수 없습니다.");
             })
             .finally(() => {
-                //정상 종료든 아니든 정리한다.
                 video.value = null;
                 latestLog.value = null;
+                title.value = "";
             });
     } else {
         alert("서버에 연결되지 않았습니다!");
     }
 }
 
-// const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
+watch(latestLog, async (cur:Ref<Log | null>, prv:Ref<Log | null>) => {
+    if(latestLog && latestLog.value != null) {
+        //start Video
+        try {
+            await startVideoStreaming();
+        } catch(reason) {
+            console.log(reason);
+        }
+    }
+})
 
-provide("server", server);
-provide("connected", connected);
+const startVideoStreaming = async () => {
+    while(video.value && connected.value && server.value.length != 0) {
+        try {
+            let ret:AxiosResponse = await axios.get(server.value + `/video/${video.value.title}/streaming`);
+            receivedImg.value = ret.data;
+
+            if(receivedImg.value) {
+                ret = await axios.post(server.value + `/log/${video.value.title}/prediction`, JSON.stringify(receivedImg.value), {
+                    headers: { "Content-Type": `application/json`},
+                });
+                latestLog.value = ret.data;
+
+                // Save Frame
+                // ret = await axios.post(server.value + `/video/${video.value.title}/save`, JSON.stringify(receivedImg.value), {
+                //     headers: { "Content-Type": `application/json`},
+                // });
+                // ret = await axios.post(server.value + `/log/${video.value?.title}/save`);
+                // console.log(`Frame: ${receivedImg.value.id}`);
+            } else {
+                console.log("받은 이미지가 없습니다.");
+            }
+        } catch(reason) {
+            console.log(reason);
+            // alert("영상을 받는데 실패했습니다.");
+        }
+    }
+    //화면 정리
+    console.log(`video: ${video.value}\nconnected: ${connected.value}\nserver: ${server.value}`);
+    receivedImg.value = null;
+    latestLog.value = null;
+};
 
 provide("video", video);
 provide("latestLog", latestLog);

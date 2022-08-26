@@ -3,12 +3,10 @@ export type Profile = {key:number, url:string, name:string, email:string, role:s
 
 export type Result = {code: number, msg: string, data?:any};
 
-export type Path = "왼쪽" | "중앙" | "오른쪽";
-
 export type ObjectCategory = "bicycle" | "motorcycle" | "kickboard";
 export type RiskCategory = 0 | 1 | 2;
 
-export type Object = {
+export type RawObject = {
     category : ObjectCategory,
     probability : number,
     center : [number, number],
@@ -21,7 +19,7 @@ export type RawImage = {
     captured: Date,
     width: number,
     height: number,
-    risked: Object[],
+    risked: RawObject[],
     src: string,
     id : number,
     title: string,
@@ -32,7 +30,7 @@ export type Log = {
     id: number,
     src: string,
     recorded: Date,
-    objects: Object[],
+    objects: RawObject[],
     risked: number[],
     risk: RiskCategory,
 };
