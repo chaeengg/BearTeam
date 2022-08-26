@@ -67,7 +67,7 @@ export default {
 <script lang="ts" setup>
 import {reactive, ref, Ref, onMounted, provide, watch} from 'vue';
 import {Socket} from '../modules/axios';
-import {Result, RawVideo, Log, RiskCategory} from '../types';
+import {Result, RawVideo, Log, RiskCategory, RawImage} from '../types';
 import Screen from './Screen.vue';
 import Description from './Description.vue';
 
@@ -80,6 +80,7 @@ const server:Ref<string> = ref("");
 // const log:string[] = reactive(["PM 05:38 - 왼쪽에서 자전거가 감지됩니다. 위험도: 2"]);
 const video: Ref<RawVideo | null> = ref(null);
 const latestLog: Ref<Log | null> = ref(null);
+const receivedImg:Ref<RawImage | null > = ref(null);
 
 const title:Ref<string> = ref("");
 const startVideo = () => {
@@ -91,11 +92,25 @@ const startVideo = () => {
             })
                 .then((ret:boolean) => {
                     if(ret) {
+                        return socket.run("POST", `/log/${title.value}/start`, (ret:Result) => {
+                            latestLog.value = ret.data;
+                        });
+                    }
+                    else {
+                        return Promise.reject();
+                    }
+                })
+                .then((ret:boolean) => {
+                    if(ret) {
                         alert("영상을 재생합니다.");
+                        // console.log(latestLog.value);
                         // console.log(video.value);
                     } else {
                         alert("영상을 불러오는데 실패했습니다.");
                     }
+                })
+                .catch(() => {
+                    alert("영상을 불러오는데 실패했습니다.");
                 });
         } else {
             alert("영상 제목을 입력해주세요.");
@@ -112,12 +127,24 @@ const endVideo = () => {
             video.value = ret.data;
         })
             .then((ret:boolean) => {
+                if(ret) {
+                    return socket.run("POST", `/log/${video.value?.title}/end`, (ret:Result) => {
+                        latestLog.value = ret.data;
+                    });
+                } else {
+                    return Promise.reject();
+                }
+            })
+            .then((ret:boolean) => {
                 if(ret){
                     alert(`영상이 종료되었습니다.`);
                     video.value = null;
                 } else {
                     alert("영상을 종료하는데 실패했습니다.");
                 }
+            })
+            .catch(() => {
+                alert("영상을 종료하는데 실패했습니다.");
             });
     } else {
         alert("서버가 연결되어 있지 않습니다.");
@@ -130,6 +157,7 @@ provide("socket", socket);
 provide("video", video);
 provide("latestLog", latestLog);
 provide("sleep", sleep);
+provide("receivedImg", receivedImg);
 </script>
 
 <style scoped>

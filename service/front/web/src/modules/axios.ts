@@ -36,7 +36,7 @@ export class Socket {
         return this.connected;
     }
 
-    public async run(method: METHOD, url:string, onSucess:(arg0:Result)=>void, onFailed?:()=>void, params?:{string:string}, data?: {string:any},):Promise<boolean> {
+    public async run(method: METHOD, url:string, onSuccess:(arg0:Result)=>void, onFailed?:()=>void, params?:any, data?: any,):Promise<boolean> {
         let result:Result = {};
         if(method == 'GET') {
             result = await this.get(this.server + url, params);
@@ -44,7 +44,7 @@ export class Socket {
             result = await this.post(this.server + url, data);
         }
         if(result.code == 200) {
-            onSucess(result);
+            onSuccess(result);
             return true;
         } else {
             console.log(`Communicating Failed...\n`);

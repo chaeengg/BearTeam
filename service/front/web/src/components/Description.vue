@@ -20,105 +20,89 @@ export default {
 import {Ref, inject, ref, watch} from 'vue';
 import {Socket} from '../modules/axios';
 
-import { RawVideo, Log, Result} from '../types';
+import { RawVideo, Log, Result, RawImage, ObjectCategory} from '../types';
 
 const socket: Socket = inject("socket", new Socket(""));
 const video: Ref<RawVideo | null> = inject("video", ref(null));
+const latestLog: Ref<Log| null> = inject("latestLog", ref(null));
+const sleep = inject("sleep");
+const receivedImg: Ref<RawImage| null> = inject("receivedImg", ref(null));
+
 const logs: Ref<Log[]> = ref([]);
 
-// watch(video, (currentVideo:Ref<RawVideo | null>, oldVideo:Ref<RawVideo | null>) => {
-//     if(currentVideo) {
-//        startLogStreaming();
-//     }
-// });
-
-// const startLogStreaming = async () => {
-//     // console.log("Enter!!");
-//     while(true) {
-//         if(video.value) {
-//             if(socket.isConnected()) {
-//                 const ret = await socket.run("GET", `/log/${video.value?.title}/streaming`, (ret:Result) => {
-//                     logs.value.push(ret.data);
-//                 })
-//                 .then((ret:boolean) => {
-//                     if(ret) {
-//                         // console.log(logs.value);
-//                         return true
-//                     } else {
-//                         console.log("로그를 받아오는데 실패했습니다. 연결을 확인해주세요.");
-//                         return false;
-//                     }
-//                 });
-//                 if(ret == false) {
-//                     break;
-//                 }
-//             } else {
-//                 console.log("로그를 받아오던 중, 서버와의 연결이 끊겼습니다.");
-//                 break;
-//             }
-//         } else {
-//             console.log("로그를 받아오던 중, 서버와의 연결이 끊겼습니다.");
-//             break;
-//         }
-//         setTimeout(() => {}, 3000);
-//     }
-// };
+let inferencedImg: RawImage | null;
+watch(receivedImg, (cur:Ref<RawImage|null>, prv:Ref<RawImage|null>) => {
+    if(cur.value) {
+        inferencedImg = cur.value;
+        await socket.run("POST", "/log/prediction", (ret: Result) => {
+        latestLog.value = ret.data;
+        if(latestLog.value) {
+            logs.value.push(latestLog.value);
+        }
+    }, undefined, undefined, inferencedImg)
+    .then((ret:boolean) => {
+        if(ret) {
+            return await socket.run("POST", `/video/${video.value?.title}/save`, (ret:Result) => {
+                if(ret.data == true) {
+                    console.log("추론된 이미지가 저장되었습니다.");
+                } else {
+                    console.log("추론된 이미지가 저장되지 않았습니다.");
+                }
+            }, undefined, undefined, inferencedImg);
+        }
+        else {
+            return Promise.reject();
+        }
+    })
+    .then((ret:boolean) => {
+        if(ret) {
+            return await socket.run("POST", `/log/${video.value?.title}/save`, (ret:Result) => {});
+        } else {
+            return Promise.reject();
+        }
+    })
+    .then((ret:boolean) => {
+        if(ret) {
+            console.log("추론된 로그가 기록되었습니다.");
+        } else {
+            console.log("추론된 로그가 저장되지 않았습니다.");
+        }
+    })
+    .catch(() => {
+        console.log("추론된 로그가 저장되지 않았습니다.");
+    })
+    }
+});
 
 const format = (log:Log):string => {
-    log.objects;
-    log.recorded;
-    log.risk;
-    log.risked;
-    msg1 = "날짜: {log.recorded}";
-    msg2 = if (log.risk == 0){
-            "주의하세요!";
-    } elif (log.risk == 1){
-       "조심하세요!";
+    let msg:string = "";
+
+    msg += `[ ${log.recorded} ] `;
+    msg += `[ 위험도: `;
+    if(log.risk == 0) {
+        msg += '낮음';
+    } else if(log.risk == 1) {
+        msg += '주의';
     } else {
-        "위험합니다!";
+        msg += '위험';
     }
+    msg += ' ] ';
 
-    /* msg2 = if (log.risk ==0):
-                print("장애물이 있습니다! 주의하세요!")
-            else:
-                print("장애물이 접근합니다! 조심하세요!") */
-    /*
+    const objCounts:{[key: string]: number} = {"bicycle": 0, "motorcycle": 0, "kickboard": 0};
 
-
-    */
-   
-    /*msg3 : object 종류에 대한 message (갯수 고려 x)*/
-    cnt = log.objects.length
-    for(cnt)
-    {
-        i = 0;
-        num_bicycle = 0;
-        num_kickboard = 0;
-        num_motorcycle = 0;
-        msg3 = ""
-        if (log.objects[i].category == "bicycle"){
-                if (num_bicycle > 0)
-                    continue;
-                msg3 = msg3 + "자전거";
-        } elif (log.objects[i].category == "motorcycle"){
-                if (num_motorcycle > 0)
-                    continue;
-                msg3 = msg3 + "오토바이";
-        } else {
-            if (num_kickboard > 0)
-                    continue;
-            msg3 = msg3 + "킥보드";
+    for(let obj of log.objects) {
+        objCounts[obj.category] += 1;
+    }
+    msg += `[ 자전거: ${objCounts["bicycle"]}개, 오토바이: ${objCounts["motorcycle"]}, 킥보드: ${objCounts["kickboard"]} ] `;
+    
+    if(log.risked.length > 0) {
+        msg += `[ 위험물:`;
+        for(let idx of log.risked) {
+            msg += ` ${log.objects[idx]} `;
         }
-
-        if cnt > 1:
-            msg3 = msg3+ "와 ";
-        cnt = cnt - 1;
-        i = i + 1;
+        msg += '] ';
     }
-    alert(msg3);
-
-
-        
+    return msg;
 }
     
 

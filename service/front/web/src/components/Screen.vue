@@ -23,12 +23,11 @@ const socket: Socket = inject("socket", new Socket(""));
 const video: Ref<RawVideo | null> = inject("video", ref(null));
 const latestLog: Ref<Log| null> = inject("latestLog", ref(null));
 const sleep = inject("sleep");
+const receivedImg: Ref<RawImage| null> = inject("receivedImg", ref(null));
 
 const canvas:Ref<HTMLCanvasElement | null> = ref(null);
 const ctx:Ref<CanvasRenderingContext2D | null> = ref(null);
 
-const rawImg:Ref<RawImage | null > = ref(null);
-const img = ref(new Image());
 const imgData: Ref<ImageData> = ref(new ImageData(1, 1));
 
 onMounted(() => {
@@ -53,7 +52,7 @@ const startVideoStreaming = async () => {
         if(video.value) {
             if(socket.isConnected()) {
                 const ret = await socket.run("GET", `/video/${video.value?.title}/streaming`, (ret:Result) => {
-                    rawImg.value = ret.data;
+                    receivedImg.value = ret.data;
                 })
                 .then((ret:boolean) => {
                     if(ret) {
@@ -64,7 +63,7 @@ const startVideoStreaming = async () => {
                 })
                 .then((ret: boolean) => {
                     if(ret) {
-                        console.log(`Frame: ${rawImg.value?.id}\n`);
+                        console.log(`Frame: ${receivedImg.value?.id}\n`);
                         return true;
                     } else {
                         console.log("Canvas Context에 접근할 수 없습니다.");
@@ -98,7 +97,7 @@ const startVideoStreaming = async () => {
 let bytes: Uint8Array;
 const setImage = async () => {
     if(video.value && ctx.value) {
-        bytes = Uint8Array.from(atob(rawImg.value?.data ? rawImg.value?.data : ""), c => c.charCodeAt(0));
+        bytes = Uint8Array.from(atob(receivedImg.value?.data ? receivedImg.value?.data : ""), c => c.charCodeAt(0));
         imgData.value.data.set(bytes);
         ctx.value?.putImageData(imgData.value, 0, 0);
         return true;
@@ -108,7 +107,7 @@ const setImage = async () => {
 }
 
 watch(latestLog, (cur:Ref<Log | null>, pr:Ref<Log | null>) => {
-    if(cur.value != null && ctx.value) {
+    if(cur.value != null && ctx.value && canvas.value) {
         ctx.value.fillStyle = 'red';
         ctx.value.globalAlpha = 0.5;
 
@@ -116,46 +115,28 @@ watch(latestLog, (cur:Ref<Log | null>, pr:Ref<Log | null>) => {
         let pos:number;
         for(let idx of cur.value.risked) {
             pos = cur.value.objects[idx].center[0];
-            if(pos < 0.5) {
-
+            if(pos < 0.33) {
+                riskedPos.push("left");
+            } else if(pos < 0.66) {
+                riskedPos.push("center");
+            } else {
+                riskedPos.push("right");
             }
-            
         }
 
-
-        ctx.value.fillRect(center.value[0], center.value[1], bbox_width.value, bbox_height.value);
+        for(let pos of riskedPos) {
+            if(pos == "left") {
+                ctx.value.fillRect(0, 0, canvas.value.width / 3, canvas.value.height);
+            } else if(pos == "center") {
+                ctx.value.fillRect(canvas.value.width / 3, 0, canvas.value.width / 3, canvas.value.height);
+            } else {
+                ctx.value.fillRect(2 * canvas.value.width / 3, 0, canvas.value.width / 3, canvas.value.height);
+            }
+        }
         ctx.value.globalAlpha = 1.0;
-        ctx.value.textAlign = "center";
-        ctx.value.font = "bold 30px KOTRA_BOLD-Bold";
-        ctx.value.fillText(`${objName} 감지! 위험도: ${risk}`, 300, 300);
     }
 })
 
-// img.value.src = 'src/assets/profiles/KakaoTalk_20220823_113458238.jpg';
-
-// const path:Ref<Path> = computed(() => {
-//     if()
-//     if (center.value[0] + bbox_width.value / 2 <= 213) {
-//         return "왼쪽";
-//     } else if (center.value[0] + bbox_width.value / 2 <= 427) {
-//         return "중앙";
-//     } else {
-//         return "오른쪽"
-//     }
-// });
-
-// img.value.onload = () => {
-//     if(ctx.value) {
-//         ctx.value.drawImage(img.value, 0, 0);
-//         ctx.value.fillStyle = 'red';
-//         ctx.value.globalAlpha = 0.5;
-//         ctx.value.fillRect(center.value[0], center.value[1], bbox_width.value, bbox_height.value);
-//         ctx.value.globalAlpha = 1.0;
-//         ctx.value.textAlign = "center";
-//         ctx.value.font = "bold 30px KOTRA_BOLD-Bold";
-//         ctx.value.fillText(`${objName} 감지! 위험도: ${risk}`, 300, 300);
-//     }
-// }
 
 </script>
 
