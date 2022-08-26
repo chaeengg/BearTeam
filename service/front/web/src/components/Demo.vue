@@ -32,7 +32,7 @@
             <input type="url" class="form-control" id="serverAddr" v-model="server" aria-describedby="urlHelp" required aria-required="true" placeholder="http://localhost:9000">
             <div id="urlHelp" class="form-text">서버 주소는 라즈베리 파이 주소입니다</div>
         </div>
-        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" @click="socket.connectServer(server); server=''">Submit</button>
+        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" @click="connectServer(); server=''">Submit</button>
       </div>
     </div>
   </div>
@@ -66,97 +66,94 @@ export default {
 
 <script lang="ts" setup>
 import {reactive, ref, Ref, onMounted, provide, watch} from 'vue';
-import {Socket} from '../modules/axios';
+
 import {Result, RawVideo, Log, RiskCategory, RawImage} from '../types';
 import Screen from './Screen.vue';
 import Description from './Description.vue';
 
-const socket:Socket = new Socket("");
+import axios, {Axios, AxiosResponse} from 'axios';
 
 const server:Ref<string> = ref("");
+let connected:boolean = false;
 
-
-// const video:Ref<Video> = ref({title:"", url:"", type:""});
-// const log:string[] = reactive(["PM 05:38 - 왼쪽에서 자전거가 감지됩니다. 위험도: 2"]);
 const video: Ref<RawVideo | null> = ref(null);
 const latestLog: Ref<Log | null> = ref(null);
 const receivedImg:Ref<RawImage | null > = ref(null);
 
 const title:Ref<string> = ref("");
+
+const connectServer = () => {
+    axios.get(server.value)
+        .then((res:AxiosResponse) => {
+            console.log("서버 연결 성공");
+            alert("서버에 연결되었습니다.");
+            connected = true;
+        })
+        .catch((reson) => {
+            console.log("연결 실패!!!");
+            console.log(reson);
+            alert("서버 연결을 실패했습니다.");
+            connected = false;
+        })
+};
+
+
 const startVideo = () => {
-    if(socket.isConnected()){
-        if(title.value.length > 0) {
-            socket.run("POST", `/video/${title.value}/start`, (ret:Result) => {
-                // console.log(ret);
+    if(connected) {
+        if(title.value.length > 0){
+        axios.post(server + `/video/${title.value}/start`)
+            .then((ret:AxiosResponse) => {
                 video.value = ret.data;
+                return axios.post(server + `/log/${title.value}/start`);
             })
-                .then((ret:boolean) => {
-                    if(ret) {
-                        return socket.run("POST", `/log/${title.value}/start`, (ret:Result) => {
-                            latestLog.value = ret.data;
-                        });
-                    }
-                    else {
-                        return Promise.reject();
-                    }
-                })
-                .then((ret:boolean) => {
-                    if(ret) {
-                        alert("영상을 재생합니다.");
-                        // console.log(latestLog.value);
-                        // console.log(video.value);
-                    } else {
-                        alert("영상을 불러오는데 실패했습니다.");
-                    }
-                })
-                .catch(() => {
-                    alert("영상을 불러오는데 실패했습니다.");
-                });
+            .then((ret:AxiosResponse) => {
+                latestLog.value = ret.data;
+                alert("영상을 시작합니다.");
+            })
+            .catch((reason) => {
+                console.log(reason);
+                alert("영상을 시작할 수 없습니다.");
+            })
+            .finally(() => title.value = "");
         } else {
-            alert("영상 제목을 입력해주세요.");
+            alert("유효한 제목을 입력해주세요.");
         }
     } else {
-        alert("서버가 연결되어 있지 않습니다.");
+        alert("서버에 연결되지 않았습니다!");
     }
-    title.value = "";
 };
 
 const endVideo = () => {
-    if(socket.isConnected()) {
-        socket.run("POST", `/video/${video.value?.title}/end`, (ret:Result) => {
-            video.value = ret.data;
-        })
-            .then((ret:boolean) => {
-                if(ret) {
-                    return socket.run("POST", `/log/${video.value?.title}/end`, (ret:Result) => {
-                        latestLog.value = ret.data;
-                    });
-                } else {
-                    return Promise.reject();
-                }
+    if(connected) {
+        axios.post(server + `/video/${video.value?.title}/recorded/end`)
+            .then((ret:AxiosResponse) => {
+                return axios.post(server + `/log/${video.value?.title}/recorded/end`);
             })
-            .then((ret:boolean) => {
-                if(ret){
-                    alert(`영상이 종료되었습니다.`);
-                    video.value = null;
-                } else {
-                    alert("영상을 종료하는데 실패했습니다.");
-                }
+            .then((ret:AxiosResponse) => {
+                alert("영상을 종료합니다.");
             })
-            .catch(() => {
-                alert("영상을 종료하는데 실패했습니다.");
+            .catch((reason) => {
+                console.log(reason);
+                alert("영상을 종료할 수 없습니다.");
+            })
+            .finally(() => {
+                //정상 종료든 아니든 정리한다.
+                connected = false;
+                video.value = null;
+                latestLog.value = null;
             });
     } else {
-        alert("서버가 연결되어 있지 않습니다.");
+        alert("서버에 연결되지 않았습니다!");
     }
-};
+}
 
-const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
+// const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
-provide("socket", socket);
+provide("server", server);
+provide("connected", connected);
+
 provide("video", video);
 provide("latestLog", latestLog);
-provide("sleep", sleep);
 provide("receivedImg", receivedImg);
 </script>
 

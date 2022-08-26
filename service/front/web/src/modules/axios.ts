@@ -57,11 +57,10 @@ export class Socket {
         }
     }
 
-    private async get(url:string, params?: {string: string}, ):Promise<Result> {
+    private async get(url:string, params?: any, ):Promise<Result> {
         const config:AxiosRequestConfig = {params: params};
         try {
-            const res: AxiosResponse = await axios.get(url, config);
-            console.log(res);
+            const res: AxiosResponse = await axios.get(url, {params: params});
             if(res.status == 200) {
                 return {code: res.status, msg:res.statusText, data:res.data};
             } else {
@@ -73,9 +72,14 @@ export class Socket {
         }
     }
 
-    private async post(url:string, data?: {string:any}, ): Promise<Result> {
+    private async post(url:string, data?: any, ): Promise<Result> {
         try {
-            const res: AxiosResponse = await axios.post(url, data);
+            console.log(url)
+            const res: AxiosResponse = await axios.post(url=url, data=data, {
+                headers: {
+                  "Content-Type": `application/json`,
+            }
+        }
             if(res.status == 200) {
                 return {code: res.status, msg:res.statusText, data:res.data};
             } else {

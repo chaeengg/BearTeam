@@ -18,61 +18,79 @@ export default {
 
 <script lang="ts" setup>
 import {Ref, inject, ref, watch} from 'vue';
-import {Socket} from '../modules/axios';
+// import {Socket} from '../modules/axios';
 
 import { RawVideo, Log, Result, RawImage, ObjectCategory} from '../types';
 
-const socket: Socket = inject("socket", new Socket(""));
+import axios, {AxiosResponse} from 'axios';
+
+// const socket: Socket = inject("socket", new Socket(""));
+
+const server:Ref<string> = inject("server", ref(""));
+const connected:Ref<boolean> = inject("connected", ref(false));
+
 const video: Ref<RawVideo | null> = inject("video", ref(null));
 const latestLog: Ref<Log| null> = inject("latestLog", ref(null));
-const sleep = inject("sleep");
+// const sleep = inject("sleep");
 const receivedImg: Ref<RawImage| null> = inject("receivedImg", ref(null));
 
 const logs: Ref<Log[]> = ref([]);
 
 let inferencedImg: RawImage | null;
-watch(receivedImg, (cur:Ref<RawImage|null>, prv:Ref<RawImage|null>) => {
+
+watch(receivedImg, async (cur:Ref<RawImage|null>, prv:Ref<RawImage|null>) => {
     if(cur.value) {
-        inferencedImg = cur.value;
-        await socket.run("POST", "/log/prediction", (ret: Result) => {
-        latestLog.value = ret.data;
-        if(latestLog.value) {
-            logs.value.push(latestLog.value);
-        }
-    }, undefined, undefined, inferencedImg)
-    .then((ret:boolean) => {
-        if(ret) {
-            return await socket.run("POST", `/video/${video.value?.title}/save`, (ret:Result) => {
-                if(ret.data == true) {
-                    console.log("추론된 이미지가 저장되었습니다.");
-                } else {
-                    console.log("추론된 이미지가 저장되지 않았습니다.");
-                }
-            }, undefined, undefined, inferencedImg);
-        }
-        else {
-            return Promise.reject();
-        }
-    })
-    .then((ret:boolean) => {
-        if(ret) {
-            return await socket.run("POST", `/log/${video.value?.title}/save`, (ret:Result) => {});
-        } else {
-            return Promise.reject();
-        }
-    })
-    .then((ret:boolean) => {
-        if(ret) {
-            console.log("추론된 로그가 기록되었습니다.");
-        } else {
-            console.log("추론된 로그가 저장되지 않았습니다.");
-        }
-    })
-    .catch(() => {
-        console.log("추론된 로그가 저장되지 않았습니다.");
-    })
+        predict(cur.value)
+            .then((res) => {
+                if(cur.value)
+                    return checkpoint(cur.value);
+                else
+                    return Promise.reject(`현재 이미지가 없습니다, ${cur}`);
+            })
+            .then((res) => console.log("Checkpoint 생성에 성공했습니다."))
+            .catch((reason) => {
+                console.log(reason);
+            });
     }
 });
+
+const predict = async (img:RawImage) => {
+    if(server.value.length > 0 && connected.value && video.value){
+        axios.post(server + `/log/${video.value.title}/prediction`, JSON.stringify(img), {
+            headers: { "Content-Type": `application/json`},
+        })
+        .then((res: AxiosResponse) => {
+            latestLog.value = res.data;
+            if(latestLog.value) {
+                logs.value.push(latestLog.value)
+            }
+        })
+        .catch((reason) => {
+            console.log("추론에 실패했습니다.");
+            return reason;
+        });
+    } else {
+        return Promise.reject(`Predict: server: ${server.value}\nconnected: ${connected.value}\nvideo: ${video.value}`);
+    }
+};
+
+const checkpoint = async (img:RawImage) => {
+if(server.value.length > 0 && connected.value && video.value){
+        axios.post(server + `/video/${video.value.title}/save`, JSON.stringify(img), {
+            headers: { "Content-Type": `application/json`},
+        })
+        .then((res: AxiosResponse) => {
+            return axios.post(server + `/log/${video.value?.title}/save`);
+        })
+        .catch((reason) => {
+            console.log("체크포인트 생성에 실패했습니다..");
+            return reason;
+        });
+    } else {
+        return Promise.reject(`Checkpoint: server: ${server.value}\nconnected: ${connected.value}\nvideo: ${video.value}`);
+    }
+}
+
 
 const format = (log:Log):string => {
     let msg:string = "";
@@ -104,7 +122,5 @@ const format = (log:Log):string => {
     }
     return msg;
 }
-    
-
             
 </script>

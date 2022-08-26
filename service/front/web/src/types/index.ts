@@ -29,6 +29,8 @@ export type RawImage = {
 };
 
 export type Log = {
+    id: number,
+    src: string,
     recorded: Date,
     objects: Object[],
     risked: number[],
