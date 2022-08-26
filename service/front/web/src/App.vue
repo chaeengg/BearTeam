@@ -11,8 +11,8 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { ref, provide, reactive } from 'vue';
-import { Page } from '/@types';
+import { Ref, ref, provide, reactive } from 'vue';
+import { Page } from './types';
 
 const pages: {[page: string]:Page} = reactive({
     'home': {
@@ -31,7 +31,7 @@ const pages: {[page: string]:Page} = reactive({
         name: 'TEAM INFO',
     },
 });
-const currentPage:Page = ref(pages.home);
+const currentPage:Ref<Page> = ref(pages.home);
 
 const onFocus = (evt:Event, page:Page) => {
     // console.log(evt.currentTarget);

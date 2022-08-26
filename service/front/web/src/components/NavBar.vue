@@ -21,10 +21,10 @@ export default {
 
 <script lang="ts" setup>
 import { inject } from 'vue';
-import { Page } from '/@types';
+import { Page } from '../types';
 
 const pages:{[page:string]:Page} = inject('pages', {});
-const currentPage:Page = inject('currentPage', {});
+const currentPage:Page = inject('currentPage', {key:-1, url:"", name:""});
 const onFocus:(evt:Event, page:Page)=>void = inject('onFocus', (evt:Event, page:Page) => {});
 </script>
 

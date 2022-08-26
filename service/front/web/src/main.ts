@@ -1,4 +1,5 @@
-import {createApp} from 'vue/dist/vue.esm-bundler';
+// import {createApp} from 'vue/dist /vue.esm-bundler';
+import { createApp } from 'vue';
 
 import App from '/@/App.vue';
 import Home from '/@components/Home.vue'
@@ -13,15 +14,12 @@ import Description from '/@components/Description.vue';
 
 
 // import store from '/@store';
-import { router } from '/@router';
 
 import '../index.css'
 import 'bootstrap/dist/js/bootstrap.esm.min';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const app = createApp(App);
-
-app.use(router);
 
 app.component(Home.name, Home);
 app.component(Demo.name, Demo);

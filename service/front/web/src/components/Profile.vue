@@ -25,7 +25,7 @@ export default {
 
 <script lang="ts" setup>
 import {reactive} from 'vue';
-import {Profile} from '/@types';
+import {Profile} from '../types';
 
 const profiles:Profile[] = reactive([
     {key: 0, name: '배채은', url: 'src/assets/profiles/chaeeun.png', email: 'bchaeeun9@naver.com', role: '개발&학습'},

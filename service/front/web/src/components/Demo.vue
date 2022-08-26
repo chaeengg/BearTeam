@@ -70,7 +70,7 @@ import {ref, Ref, provide, watch} from 'vue';
 
 import Screen from './Screen.vue';
 import Description from './Description.vue';
-import {RawVideo, Log, RawImage} from '/@types';
+import {RawVideo, Log, RawImage} from '../types';
 
 const _server:Ref<string> = ref("");
 const server:Ref<string> = ref("");

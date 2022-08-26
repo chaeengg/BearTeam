@@ -14,7 +14,7 @@ export default {
 <script lang="ts" setup>
 import {Ref, inject, ref, watch} from 'vue';
 
-import {Log} from '/@types';
+import {Log} from '../types';
 
 const latestLog: Ref<Log| null> = inject("latestLog", ref(null));
 
