@@ -1,4 +1,5 @@
 from enum import Enum, unique
+from operator import ge, gt, le, lt, eq
 
 @unique
 class ObjectCategory(Enum):
@@ -32,4 +33,36 @@ class RiskCategory(Enum):
     LOW = 0
     MID = 1
     HIGH = 2
+
+    def __eq__(self, other):
+        if type(other) == RiskCategory:
+            return eq(self.value, other.value)
+        else:
+            return False
+    
+    def __gt__(self, other):
+        if type(other) == RiskCategory:
+            return gt(self.value, other.value)
+        else:
+            return False
+
+    def __ge__(self, other):
+        if type(other) == RiskCategory:
+            return ge(self.value, other.value)
+        else:
+            return False
+
+    def __lt__(self, other):
+        if type(other) == RiskCategory:
+            return lt(self.value, other.value)
+        else:
+            return False
+
+    def __le__(self, other):
+        if type(other) == RiskCategory:
+            return le(self.value, other.value)
+        else:
+            return False
+
+
 

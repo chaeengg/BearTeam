@@ -19,9 +19,9 @@ import seaborn as sn
 import torch
 from PIL import Image, ImageDraw, ImageFont
 
-from utils.general import (CONFIG_DIR, FONT, LOGGER, check_font, check_requirements, clip_coords, increment_path,
+from YOLOv5n.utils.general import (CONFIG_DIR, FONT, LOGGER, check_font, check_requirements, clip_coords, increment_path,
                            is_ascii, threaded, try_except, xywh2xyxy, xyxy2xywh)
-from utils.metrics import fitness
+from YOLOv5n.utils.metrics import fitness
 
 # Settings
 RANK = int(os.getenv('RANK', -1))

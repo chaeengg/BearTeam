@@ -46,7 +46,7 @@ class MyCamera(metaclass=Singleton):
     def isConnected(self):
         return self._isConnected
 
-    async def start_video(self, title:str, width:float, height:float)->None:
+    async def start_video(self, title:str, width:int, height:int)->None:
         """
         video를 새로 지정하고, 해당 비디오와 동일한 구성요소가 디스크에 있으면 지운다.
         """

@@ -63,7 +63,7 @@ async def save_log(title, response:Response):
         response.status_code = status.HTTP_404_NOT_FOUND
     return None
 
-@router.get('/{title}/prediction', response_model=Log)
+@router.post('/{title}/prediction', response_model=Log)
 async def predict(title:str, img:Image, response:Response):
     """
     수신된 Image에 대해 Prediction 수행
@@ -79,7 +79,9 @@ async def predict(title:str, img:Image, response:Response):
         response.status_code = status.HTTP_404_NOT_FOUND
         return None
     else:
+        # print("Enter\n\n\n\n\n\n\n\n\n\n")
         log:Log = await model.write(img)
+        # print("ENd\n\n\n\n\n\n\n\n\n\n")
         return log
 
 @router.get('/{title}/{id}', response_model=Log)
