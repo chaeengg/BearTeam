@@ -71,11 +71,11 @@ const format = (log:Log):string => {
     log.risked;
     msg1 = "날짜: {log.recorded}";
     msg2 = if (log.risk == 0){
-            alert("주의하세요!");
+            "주의하세요!";
     } elif (log.risk == 1){
-        alert("조심하세요!");
+       "조심하세요!";
     } else {
-        alert("위험합니다!");
+        "위험합니다!";
     }
 
     /* msg2 = if (log.risk ==0):
@@ -87,25 +87,40 @@ const format = (log:Log):string => {
 
     */
    
-    
-    cnt = objects.length
+    /*msg3 : object 종류에 대한 message (갯수 고려 x)*/
+    cnt = log.objects.length
     for(cnt)
     {
-        i = 0
-        if (log.objects.category == "bicycle"){
-                msg3 = alert("자전거");
-        } elif (log.objects[i].category == "motocycle"){
-                msg3 = alert("오토바이");
+        i = 0;
+        num_bicycle = 0;
+        num_kickboard = 0;
+        num_motorcycle = 0;
+        msg3 = ""
+        if (log.objects[i].category == "bicycle"){
+                if (num_bicycle > 0)
+                    continue;
+                msg3 = msg3 + "자전거";
+        } elif (log.objects[i].category == "motorcycle"){
+                if (num_motorcycle > 0)
+                    continue;
+                msg3 = msg3 + "오토바이";
         } else {
-            msg3 = alert("킥보드");
-        }
+            if (num_kickboard > 0)
+                    continue;
+            msg3 = msg3 + "킥보드";
         }
 
         if cnt > 1:
-            msg3 = alert("와");
-        cnt -= 1;
+            msg3 = msg3+ "와 ";
+        cnt = cnt - 1;
         i = i + 1;
     }
+    alert(msg3);
+
+
+        
+}
+    
 
             
 </script>
