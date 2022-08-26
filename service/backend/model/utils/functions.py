@@ -1,3 +1,8 @@
+
+from model.assets import modelStoreConfig
+
+from pathlib import Path
+
 from common.types import *
 from datetime import datetime
 
@@ -14,10 +19,10 @@ class BBOX(BaseModel):
 
 ###1. IOU => 같은 오브젝트인지 판단하기
 async def get_iou(obj1:Object, obj2:Object)->bool:
-    bbox1 = get_bbox(obj1)
-    bbox2 = get_bbox(obj2)
+    bbox1 = await get_bbox(obj1)
+    bbox2 = await get_bbox(obj2)
 
-    intersecBbox = get_intersection(bbox1, bbox2)
+    intersecBbox = await get_intersection(bbox1, bbox2)
 
     if intersecBbox.width > 0 and intersecBbox.height > 0:
         intersectionArea = intersecBbox.width * intersecBbox.height
@@ -55,10 +60,10 @@ async def get_intersection(bbox1:BBOX, bbox2:BBOX)-> BBOX:
 
 
 async def is_same(obj1:Object, obj2:Object, thresh = 0.5)->bool:
-    if get_iou(obj1, obj2) > thresh:
-        return True
+    if obj1.category == obj2.category and await get_iou(obj1, obj2) > thresh:
+            return True
     else:
-        return False
+            return False
 
 
 async def calculate_risk(objs:List[Object], alpha=0.5)->RiskCategory:
@@ -101,10 +106,27 @@ async def get_gradient(objs:List[Object]):
     else:
         return 0.5
     
-        
-async def find_sameObjects(imgas:List[Image]) -> List[List[Object]]:
+async def find_sameObjects(logs:List[Log]) -> List[List[Object]]:
     """
-    프레임마다 동일한 Object들을 찾아서 시간순으로 정렬한다.(0: 가장 오래된 것, -1: 가장 최신)
+    로그가 저장된 프레임마다 동일한 Object들을 찾아서 시간순으로 정렬한다.(0: 가장 오래된 것, -1: 가장 최신)
+    각 로그에 저장된 오브젝트는 model prediction 단계에서 서로 다른 Object라고 판단된 것이다!!
+    바로 이전 프레임과 비교하여 같은 물체인지를 판단한다.
     """
-    
-    pass
+    sameObjects:List[List[Object]] = [[obj] for obj in logs[0].objects] # Init
+
+    for log in logs[1:]:
+        for currentObj in log.objects:
+            isExist = False
+            for objList in sameObjects:
+                if len(objList) != 0 and await is_same(objList[-1], currentObj):
+                    objList.append(currentObj)
+                    isExist = True
+                    break
+            if not isExist:
+                sameObjects.append([currentObj]) # 새로운 Object의 등장
+    return sameObjects
+
+
+
+async def make_log_name(src:str, id:int)->Path:
+    return modelStoreConfig['paths']['logs'] / src / (src + '_' + str(id) + '.json')
