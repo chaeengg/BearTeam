@@ -17,10 +17,12 @@ import {ref, reactive, Ref, computed, onMounted, inject, watch} from 'vue';
 // import { Socket } from '/@modules/axios';
 import { Socket } from '../modules/axios'
 
-import {RawVideo, Path, RawImage, Result} from '../types';
+import {RawVideo, Path, RawImage, Result, Log} from '../types';
 
 const socket: Socket = inject("socket", new Socket(""));
 const video: Ref<RawVideo | null> = inject("video", ref(null));
+const latestLog: Ref<Log| null> = inject("latestLog", ref(null));
+const sleep = inject("sleep");
 
 const canvas:Ref<HTMLCanvasElement | null> = ref(null);
 const ctx:Ref<CanvasRenderingContext2D | null> = ref(null);
@@ -32,8 +34,6 @@ const imgData: Ref<ImageData> = ref(new ImageData(1, 1));
 onMounted(() => {
     ctx.value = canvas.value?.getContext("2d") as CanvasRenderingContext2D;
 });
-
-const _sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
 //계속 이미지 받아오기
 let width: number = 1;
@@ -103,8 +103,33 @@ const setImage = async () => {
         ctx.value?.putImageData(imgData.value, 0, 0);
         return true;
     }
+    // 가장 최신 로그로 이미지에 표시한다.
     return false;
 }
+
+watch(latestLog, (cur:Ref<Log | null>, pr:Ref<Log | null>) => {
+    if(cur.value != null && ctx.value) {
+        ctx.value.fillStyle = 'red';
+        ctx.value.globalAlpha = 0.5;
+
+        const riskedPos: ("left" | "center" | "right")[] = [];
+        let pos:number;
+        for(let idx of cur.value.risked) {
+            pos = cur.value.objects[idx].center[0];
+            if(pos < 0.5) {
+
+            }
+            
+        }
+
+
+        ctx.value.fillRect(center.value[0], center.value[1], bbox_width.value, bbox_height.value);
+        ctx.value.globalAlpha = 1.0;
+        ctx.value.textAlign = "center";
+        ctx.value.font = "bold 30px KOTRA_BOLD-Bold";
+        ctx.value.fillText(`${objName} 감지! 위험도: ${risk}`, 300, 300);
+    }
+})
 
 // img.value.src = 'src/assets/profiles/KakaoTalk_20220823_113458238.jpg';
 

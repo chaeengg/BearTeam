@@ -67,7 +67,7 @@ export default {
 <script lang="ts" setup>
 import {reactive, ref, Ref, onMounted, provide, watch} from 'vue';
 import {Socket} from '../modules/axios';
-import {Result, RawVideo,} from '../types';
+import {Result, RawVideo, Log, RiskCategory} from '../types';
 import Screen from './Screen.vue';
 import Description from './Description.vue';
 
@@ -79,7 +79,7 @@ const server:Ref<string> = ref("");
 // const video:Ref<Video> = ref({title:"", url:"", type:""});
 // const log:string[] = reactive(["PM 05:38 - 왼쪽에서 자전거가 감지됩니다. 위험도: 2"]);
 const video: Ref<RawVideo | null> = ref(null);
-
+const latestLog: Ref<Log | null> = ref(null);
 
 const title:Ref<string> = ref("");
 const startVideo = () => {
@@ -124,8 +124,12 @@ const endVideo = () => {
     }
 };
 
+const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
+
 provide("socket", socket);
 provide("video", video);
+provide("latestLog", latestLog);
+provide("sleep", sleep);
 </script>
 
 <style scoped>
