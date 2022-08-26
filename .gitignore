@@ -259,15 +259,9 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Model
-*.pt
-
 # Others
 *.DS_Store
 
 # datasets
 data/datasets/Sample
 data/datasets/Target
-
-# Assets
-service/**/assets
